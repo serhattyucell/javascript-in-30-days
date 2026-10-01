@@ -1,10 +1,10 @@
 # 30. Gün — Kapanış
 
-Son günde iki iş vardır. İkisi de yeni konu değildir. Biri veriyi kart ve süzgeç yapar, öteki girilen metni kalıpla denetler. Bu iki iş, otuz günü bir araya getirir: tipten döngüye, nesneden DOM’a, depodan ağa.
+İki iş vardır. İkisi de yeni konu değildir. Biri veriyi kart ve süzgeç yapar. Öteki girilen metni kalıpla denetler. İkisi birlikte, önceki günlerdeki araçları aynı sayfada tutar.
 
-## Birinci iş: atölye raftı
+## Birinci iş: durak rafı
 
-26. günkü ülke kartına benzeyen bir raf kurulur. Kayıtlar bu otuz günün işleridir.
+26. günkü ülke kartına benzeyen bir raf kurulur. Kayıtlar bu günlerin işleridir.
 
 ```js
 const isler = [
@@ -12,48 +12,73 @@ const isler = [
   { ad: "Çubuk grafik", gun: 25, etiket: "veri" },
   { ad: "Ülke kartları", gun: 26, etiket: "süzgeç" },
   { ad: "Portfolyo", gun: 27, etiket: "durum" },
-  { ad: "Skor tablosu", gun: 28, etiket: "depo" },
+  { ad: "Skor tablosu", gun: 28, etiket: "kayit" },
   { ad: "Renk akışı", gun: 29, etiket: "zaman" },
 ]
 ```
 
-Her kartta ad, gün ve etiket. Üstte arama, gün alanına ya da ada baksın. Etiketler `Set` ile toplanıp düğme olsun. Süzgeç yine ayrı bir fonksiyon, çizmeyi başka fonksiyon yapsın.
+Her kartta ad, gün ve etiket. Üstte arama, adın veya günün içinde baksın. `24` yazınca yalnız 24. günün kartı kalsın. Etiketler `Set` ile toplanıp düğme olsun. `veri` seçilince yalnız o etiket kalsın. Arama ile etiket birlikte çalışsın. 26. gündeki `suz` ile aynı kalıptır.
 
-Kartta küçük bir “not” alanı aç. Notu `localStorage`’a `{ ad: not }` sözlüğü diye yaz. Sayfa yenilince not yerinde kalsın. Boş not anahtarı silsin, depo şişmesin.
+Süzgeç DOM görmez. Liste girer, liste çıkar. Çizmek başka fonksiyondadır. Önce konsolda dene:
 
-## İkinci iş: kısa bir form
+```js
+function suzIsler(liste, { aranan, etiket }) {
+  const igne = aranan.toLocaleLowerCase("tr-TR")
+  return liste.filter((is) => {
+    const metin = (is.ad + " " + is.gun).toLocaleLowerCase("tr-TR")
+    const etiketTutar = etiket === "hepsi" || is.etiket === etiket
+    return metin.includes(igne) && etiketTutar
+  })
+}
+```
 
-Bir kişi kaydı: ad, e-posta, parola, parola tekrarı. Gönderilince sayfa yenilenmesin. Her alanın altında tek satırlık hata yeri olsun. İlk boyamada hepsi boş dursun, kullanıcı yazınca veya gönderince dolsun. Kırmızı çerçeveyi hata varken ekle, düzelince kaldır.
+`suzIsler(isler, { aranan: "grafik", etiket: "hepsi" })` tek kart döndürmelidir. Çubuk grafik.
+
+Kartta küçük bir not kutusu olsun. Not, `localStorage`a `{ ad: not }` diye yazılır. Sayfa yenilince not durur. Boş not o anahtarı siler, çekmece şişmesin. Anahtar `not.` ile başlasın. `not.Gezegen tartısı` gibi. `clear` çağırma.
+
+## İkinci iş: kısa form
+
+Alanlar: ad, e-posta, parola, parola tekrarı. Gönderilince sayfa yenilenmesin. `preventDefault` unutulursa uyarı bir an görünüp gider.
+
+Her alanın altında tek satırlık hata yeri olsun. İlk açılışta hepsi boş dursun. Kullanıcı yazınca veya gönderince dolsun. Hata varken kutu kırmızı olsun. Düzelince kırmızılık kalksın. Renk sınıf ile gelsin, `style.border` ile gömülmesin.
 
 Kurallar:
 
-- Ad en az 2 karakter, yalnız harf ve boşluk. Türkçe harfi 12. gündeki gibi ele al. Önce `trim`.
-- E-posta kabaca `bir@iki.uc` biçiminde olsun. Her gerçek adresi yakalamak zorunda değilsin. `\s` içermesin, bir tane `@` olsun, sonrasında bir nokta olsun.
-- Parola en az 8 karakter, en az bir rakam ve bir harf.
-- İki parola aynı olsun.
+- Ad `trim` edildikten sonra en az 2 karakter. Yalnız harf ve boşluk. Deneme adı `Serhat` olsun, geçsin. `S1` kalmasın.
+- E-posta kabaca `bir@iki.uc` biçiminde olsun. Boşluk olmasın, bir tane `@` olsun, sonrasında bir nokta olsun. Her gerçek adresi yakalamak zorunda değildir.
+- Parola en az 8 karakter. En az bir rakam ve bir harf. Kısa olanla “en az 8 karakter”, harfsiz olanla “harf yok” ayrı cümle olsun. İkisi aynı ileti olmasın.
+- İki parola aynı olsun. Değilse “parolalar aynı değil”.
 
-Kalıpları ölç, mesajları Türkçe yaz. `test` yetmiyorsa neden yetersiz olduğunu ayrı ayrı söyle: “rakam yok” ile “çok kısa” aynı cümle olmasın.
-
-Geçerliyse formu temizle, kart listesinin üstünde “kayıt alındı” de, girilen adı kartların yanında bir süre göster. Parolayı ekrana basma, depoya yazma.
+`denetle` DOM görmesin. Hata nesnesi döndürsün. Boş nesne, form temiz demektir.
 
 ```js
 function denetle(kayit) {
   const hatalar = {}
-  if (kayit.ad.trim().length < 2) hatalar.ad = "ad kısa"
-  // diğer alanlar
+  if (kayit.ad.trim().length < 2) {
+    hatalar.ad = "ad kısa"
+  }
   return hatalar
 }
+
+console.log(Object.keys(denetle({ ad: "S", eposta: "", parola: "", tekrar: "" })))
+console.log(Object.keys(denetle({ ad: "Serhat", eposta: "a@b.c", parola: "abc12345", tekrar: "abc12345" })))
 ```
 
-`denetle` DOM görmesin. Boş nesne dönerse form temizdir: `Object.keys(hatalar).length === 0`.
+İlk çağrıda `ad` anahtarı durur. İkinci çağrıda, diğer kurallar da eklenince, anahtar listesi boş olmalıdır. Boşsa form geçerlidir:
 
-## Kapanış
+```js
+const temiz = Object.keys(hatalar).length === 0
+```
 
-Otuz günde dilin çevresi dolaşılmıştır. Konsol, tip, dal, döngü, fonksiyon, nesne, liste dönüşümü, hata, sınıf, metin olarak veri, tarayıcı deposu, promise, kapsam, ağaç ve olay görülmüştür. Son günlerde bunlar yan yana konup sayfa çıkarılmıştır.
+Geçerliyse formu temizle. Kartların üstünde “kayıt alındı” yaz. Girilen adı bir süre göster. `setTimeout` ile üç saniye sonra o yazı kalkabilir. Parolayı ekrana basma. Çekmeceye de yazma.
 
-Sonraki iş, yeni bir API ezberlemek değildir. Eldeki iş küçük fonksiyonlara bölünür, veri ekrandan ayrı tutulur, hata olunca yok sayılmaz.
+## Bu gün bitince
 
-Üç gün sonra okunmayan bir ad kötüdür. O adı düzeltmek, yeni bir kütüphane eklemekten daha çok iş bitirir.
+Konsol, tip, karar, döngü, fonksiyon, nesne, liste dönüşümü, hata, sınıf, JSON, tarayıcı çekmecesi, promise, kapsam, ağaç ve olay aynı araç kutusundadır. Son sayfa bunları yan yana koyar.
+
+Sonraki iş yeni bir komut ezberlemek değildir. Eldeki iş küçük fonksiyonlara bölünür. Veri ekrandan ayrı tutulur. Hata olunca boş `catch` ile yok edilmez.
+
+Üç gün sonra okunmayan bir ad kötüdür. `d` yerine `sehirler` yazmak, yeni bir kütüphane eklemekten daha çok iş bitirir.
 
 ---
 

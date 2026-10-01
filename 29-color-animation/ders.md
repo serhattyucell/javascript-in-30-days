@@ -1,10 +1,10 @@
 # 29. Gün — Renk animasyonu
 
-Kısa bir yazı kurulur. Her harf ayrı bir renktedir ve renkler yavaşça yer değiştirir. Görünüm bir CSS kuralı ve bir zamanlayıcıyla biter. Yeni bir kütüphane gerekmez.
+Kısa bir yazı kurulur. Her harf ayrı bir renktedir. Renkler yavaşça yer değiştirir. Yeni bir kütüphane gerekmez. Metin harflere bölünür, bir `span` boyanır, `setInterval` rengi kaydırır.
 
-## Yazıyı böl
+## Yazıyı bölmek
 
-Metni `split("")` ile harflere ayır. Her harf bir `span`. Boşluk da span olsun, yoksa kelimeler yapışır. Boşluk span’ine bir sınıf ver, genişliği çökmesin: `inline-block` ve en az `0.3em`.
+`split("")` bazı birleşik karakterlerde bozulur. Düz metinde `[...metin]` her karakteri ayırır. Boşluk da bir `span` olsun. Olmazsa kelimeler yapışır. Boşluk `span`ine bir sınıf ver, genişliği çökmesin.
 
 ```js
 const yazi = "Serhat"
@@ -15,58 +15,20 @@ function kur(metin) {
   ;[...metin].forEach((harf) => {
     const span = document.createElement("span")
     span.textContent = harf
-    if (harf === " ") span.classList.add("bosluk")
+    if (harf === " ") {
+      span.classList.add("bosluk")
+    }
     sahne.append(span)
   })
 }
 ```
 
-`split("")` bazı emojilerde bozulur. Burada düz metin var, yeter. `[...metin]` kod noktalarına daha yakındır, onu kullan.
-
-## Renk
-
-Sabit bir palet tut.
-
-```js
-const palet = ["#1d4e89", "#c4552a", "#2f6f4e", "#e3b23c", "#5c4d7a"]
-```
-
-Her span’e `kaydir` diye bir sayı koy, başta indeksi. Her turda o sayıyı bir artır, `palet.length` ile moda al, rengi `style.color` ile bas.
-
-```js
-let tur = 0
-function boya() {
-  const harfler = sahne.querySelectorAll("span")
-  harfler.forEach((span, indeks) => {
-    const renk = palet[(indeks + tur) % palet.length]
-    span.style.color = renk
-  })
-  tur += 1
-}
-```
-
-`setInterval(boya, 400)`. Sayfa açılınca bir kez hemen boya, ilk 400 ms siyah kalmasın.
-
-## Durdurmak
-
-Bir düğme aralığı `clearInterval` ile kessin, tekrar basınca yeni aralık kursun. İki kez basılınca iki zamanlayıcı üst üste binmesin. Kimliği bir değişken tut, kurmadan önce eskisini temizle.
-
-İkinci bir düğme paletin yönünü çevirsin: `tur += 1` yerine bir `adim` değişkeni `1` ya da `-1` olsun. Negatif mod JavaScript’te negatiftir. İndeksi şöyle düzelt:
-
-```js
-const i = (indeks + tur) % palet.length
-const guvenli = (i + palet.length) % palet.length
-```
-
-## Görünüm
-
-Yazı büyük, sayfa ortasında, arka plan açık. `prefers-reduced-motion: reduce` varsa zamanlayıcıyı hiç kurma, harfleri bir kez boyayıp bırak. Hareketi istemeyen kişiye animasyon dayatma.
+`Serhat` altı `span` üretir. Konsolda `sahne.children.length` `6` olmalıdır. Değilse bölme yanlıştır.
 
 ```css
 #sahne {
   font-size: clamp(2.5rem, 8vw, 6rem);
   font-weight: 700;
-  letter-spacing: 0.04em;
 }
 .bosluk {
   display: inline-block;
@@ -74,13 +36,70 @@ Yazı büyük, sayfa ortasında, arka plan açık. `prefers-reduced-motion: redu
 }
 ```
 
-## Bitti saymam için
+`clamp` küçük ekranda yazıyı küçültür, büyük ekranda `6rem`de durur.
 
-- Metni değişkenden değiştirince harf sayısı uyuyor
-- Durunca renk donuyor, başlatınca kaldığı yerden akıyor
-- İki kez başlatma, hızı ikiye katlamıyor
-- Azaltılmış hareket tercihi açıksa zamanlayıcı yok
-- Palet ve metin, boyama fonksiyonunun içinde gömülü değil
+## Renk
+
+Palet sabit durur. Her turda renk bir kayar. Kayan sayının adı `tur`.
+
+```js
+const palet = ["#1d4e89", "#c4552a", "#2f6f4e", "#e3b23c", "#5c4d7a"]
+let tur = 0
+
+function boya() {
+  const harfler = sahne.querySelectorAll("span")
+  harfler.forEach((span, indeks) => {
+    const ham = (indeks + tur) % palet.length
+    const sira = (ham + palet.length) % palet.length
+    span.style.color = palet[sira]
+  })
+  tur += 1
+}
+```
+
+İlk harf tur 0’da paletin 0. rengi olur. İkinci harf 1. renk olur. Tur 1 olunca ilk harf 1. renge kayar. `%` sayıyı paletin boyuna sarar. Beş renk varsa 5, 0’a döner.
+
+JavaScript’te negatif sayıda `%` negatif sonuç verir. `-1 % 5` sonucu `-1`dir. Palet indeksi negatif olamaz. `(ham + palet.length) % palet.length` onu düzeltir. Yön tersine dönünce bu satır gerekir.
+
+Sayfa açılınca `boya()` bir kez hemen çağrılır. İlk 400 ms siyah kalmasın.
+
+```js
+let kimlik = 0
+
+function baslat() {
+  dur()
+  kimlik = setInterval(boya, 400)
+}
+
+function dur() {
+  clearInterval(kimlik)
+}
+```
+
+`baslat` önce `dur` der. İki kez basılınca iki zamanlayıcı üst üste binmez. Binirse renk iki kat hızlanır. Kimlik tutulmazsa eski aralık kesilemez.
+
+Yön için bir `adim` değişkeni `1` veya `-1` olsun. `tur += adim` yazılır. Düğme `adim`i ters çevirir.
+
+## Hareketi azaltmak
+
+İşletim sisteminde “hareketi azalt” açıksa zamanlayıcı kurulmaz. Harfler bir kez boyanır ve kalır.
+
+```js
+const azHareket = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+if (!azHareket) {
+  baslat()
+} else {
+  boya()
+}
+```
+
+## Bitti sayılması için
+
+- Metin `"Serhat Van"` olunca harf ve boşluk sayısı `sahne.children.length` ile aynıdır. Boşluk da `span`dir.
+- Durunca renk donar. Başlatınca kaldığı yerden akar. `tur` sıfırlanmak zorunda değildir.
+- İki kez başlatmak hızı ikiye katlamaz. `baslat` önce eski aralığı keser.
+- Azaltılmış hareket tercihi açıksa `setInterval` yoktur.
+- Palet ve metin, `boya`nın içine gömülü değildir. Dışarıda durur. Metin değişince yalnız `kur` yeniden çağrılır.
 
 ---
 

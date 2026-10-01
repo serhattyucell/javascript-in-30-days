@@ -1,12 +1,14 @@
 # 4. Gün — Koşullar
 
-Program, bir ifadeye göre farklı bir iş yapacaksa koşul kullanılır. Üçlü operatör kısa seçim içindir. Bu bölümde `if`, `else`, `else if` ve `switch` ele alınır.
+Program her seferinde aynı satırları çalıştırmak zorunda değildir. Bir değer belli bir aralıktaysa bir yol, değilse başka yol seçilir. Dünkü karşılaştırma burada karar haline gelir.
 
-Koşulun gövdesi süslü paranteze alınır. Tek satırda parantezsiz `if` yazılabilir; sonradan eklenen satır koşulun dışında kalır ve hata sessizce oluşur.
+Koşulun gövdesi süslü paranteze alınır. Parantezsiz tek satırlık `if` yazılabilir ama sonradan eklenen ikinci satır koşulun dışında kalır ve sessizce bozulur. Süslü parantez her zaman durur.
 
 ## if
 
-Koşul doğruysa blok çalışır. Yanlışsa hiçbir şey olmaz.
+Koşul doğruysa blok çalışır. Yanlışsa hiçbir satırı çalışmaz, program bloktan sonra devam eder.
+
+Serhat’ın biletinden 3 tane kalmış. Rafta varsa haber ver.
 
 ```js
 const stok = 3
@@ -15,9 +17,15 @@ if (stok > 0) {
 }
 ```
 
+```text
+rafta var
+```
+
+`stok` 0 yapılırsa konsol susar. Hata yoktur. Koşul tutmamıştır.
+
 ## if else
 
-İki kapı. Biri kapanınca öteki açılır.
+İki kapı vardır. Biri kapanınca öteki açılır. İkisi birden çalışmaz.
 
 ```js
 const saat = 21
@@ -28,9 +36,15 @@ if (saat < 18) {
 }
 ```
 
+```text
+lamba yak
+```
+
+21, 18’den küçük olmadığı için birinci blok atlanır, `else` çalışır. `saat` 9 yapılsaydı `gün ışığı` çıkardı.
+
 ## else if
 
-Kapı ikiden fazlaysa zincir kur. Motor ilk doğru koşulda durur, altını okumaz. Sıralama bu yüzden önemli. Dar aralığı geniş aralığın üstüne yaz.
+Kapı ikiden fazlaysa zincir kurulur. JavaScript ilk doğru koşulda durur, altını okumaz. Bu yüzden dar aralık, geniş aralığın üstüne yazılır. Not ölçeği yüksekten düşüğe dizilir.
 
 ```js
 const not = 76
@@ -51,11 +65,17 @@ if (not >= 90) {
 console.log(harf)
 ```
 
-`not >= 90` kontrolü en alta konursa 95 puan da daha üstteki gevşek koşula yakalanır. Aralıklar yüksekten düşüğe yazılır.
+```text
+C
+```
+
+76, 90’ın ve 80’in altındadır, 70’in üstündedir. Zincir `C`de durur. `D` satırına bakılmaz.
+
+Sıra ters olursa bozulur. Önce `not >= 60` yazılırsa 95 puan da o kapıdan girer ve `D` olur. Yüksek puan bir daha kontrol edilmez. Ölçek her zaman yüksekten aşağı yazılır.
 
 ## İç içe
 
-Bazen ikinci soru ancak birinci doğruysa anlamlıdır.
+İkinci soru ancak birinci doğruysa anlamlıdır. Üye değilse borca bakmaya gerek yoktur.
 
 ```js
 const uye = true
@@ -72,11 +92,19 @@ if (uye) {
 }
 ```
 
-İç içe üç kattan derinleşirse okunmaz. O zaman koşul `&&` ile yan yana yazılır ya da iş fonksiyona bölünür.
+```text
+ödünç alabilir
+```
+
+Üç kattan derin iç içe okunmaz. Aynı iş tek koşula da sığar: `uye && borc === 0`. İki yol da doğrudur. Derinlik artınca tek satırlık `&&` daha az yer kaplar.
 
 ## switch
 
-Tek bir değer birçok sabitle kıyaslanacaksa `switch` daha düz durur. Her kola `break` konur. Konmazsa alttaki kollar da çalışır. Buna kasıtlı düşme denir; istenmedikçe bırakılmaz.
+Tek bir değer birçok sabitle kıyaslanacaksa `switch` düz durur. `if` zinciri de olur. Fark, okuma kolaylığıdır.
+
+Her kolun sonuna `break` konur. Konmazsa eşleşen koldan aşağısı da çalışır. Buna düşme denir. İstenmiyorsa `break` unutulmaz.
+
+Haftanın günü `getDay()` ile gelir. Pazar 0, cumartesi 6’dır.
 
 ```js
 const gun = new Date().getDay()
@@ -96,30 +124,33 @@ switch (gun) {
 console.log(ad)
 ```
 
-`default`, hiçbir `case` tutmazsa çalışır. `else` ile aynı işi görür.
+Bugün hafta içiyse `hafta içi` çıkar. Cumartesi çalıştırılırsa `cumartesi` çıkar. `default`, hiçbir `case` tutmazsa çalışan koldur. `else` ile aynı işi görür.
 
-`switch` `===` ile kıyaslar. `"1"` ile `1` eşleşmez.
+`switch` `===` ile kıyaslar. `case "1"` ile sayı `1` eşleşmez.
 
-## Üçlü operatör, bir daha
+## Üçlü operatör yine
 
-Tek satırlık seçim:
+Tek bakışta okunan seçim üçlü ile yazılır. İçine ikinci bir üçlü konmaz. Okunmaz. O zaman `if` kullanılır.
 
 ```js
 const acik = true
 const tabela = acik ? "girebilirsin" : "kapalıyız"
+console.log(tabela)
 ```
 
-İç içe ikinci bir üçlü yazılmaz. Okunması zorlaşır. O durumda `if` daha uygundur.
+```text
+girebilirsin
+```
 
 ## Egzersizler
 
-1. Bir hava sıcaklığı alın. 0 altı “don”, 0–15 “serin”, 16–28 “ılık”, üstü “sıcak” desin.
-2. `Serhat` adlı değişken boşsa konsola “ad gerekli” yazın. Doluysa `İzmir` ile birlikte selamlayın. `if else` kullanın.
-3. 1’den 7’ye bir sayı tutun. `switch` ile haftanın gün adını yazın.
-4. İki koşulu birleştirin: bilet var **ve** yaş 12’den büyükse “salona”, değilse “uygun değil”.
-5. Bir sayının pozitif, negatif veya sıfır olduğunu söyleyen kısa bir kontrol yazın.
-6. Aynı işi üçlü operatörle de yazın. Hangisinin daha okunur olduğunu not edin.
-7. Not aralığını yanlış sırayla yazın (önce `>= 50`, sonra `>= 90`). 95’te çıkan sonucu görün, sonra sırayı düzeltin.
+1. Bir `sicaklik` değişkeni al. 0’ın altı “don”, 0–15 “serin”, 16–28 “ılık”, üstü “sıcak” desin. 30, 10 ve -2 ile üç kez dene. Üç metin de doğru kola düşsün.
+2. `ad` değişkeni boş metinse konsola “ad gerekli” yaz. Doluysa `Serhat, İzmir` gibi selamla. `if else` kullan. Boş metinle ve `"Serhat"` ile iki kez çalıştır.
+3. 1’den 7’ye bir sayı tut. `switch` ile pazartesiden pazara gün adını yaz. `break` satırını bir koldan sil, alttaki kolun da çalıştığını gör, sonra `break`i geri koy.
+4. Bilet varsa **ve** yaş 12’den büyükse “salona”, değilse “uygun değil” yaz. `&&` kullan. Yaşı 10 ve bileti `true` yap, ikinci metni gör.
+5. Bir sayının pozitif, negatif veya sıfır olduğunu söyleyen kontrol yaz. `-4`, `0` ve `9` dene.
+6. Aynı işi üçlü operatörle yaz. Hangisi daha okunuyor, bir cümle not et. Üç kola bölünmüş seçim üçlüye sığmayabilir. Sığmıyorsa `if`te kal.
+7. Not aralığını yanlış sırayla yaz. Önce `>= 50`, sonra `>= 90`. 95’te ne çıktığını gör. Sonra sırayı yüksekten düşüğe düzelt.
 
 ---
 

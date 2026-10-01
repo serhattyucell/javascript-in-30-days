@@ -1,87 +1,105 @@
 # 20. Gün — Temiz kod
 
-Dilin temel araçları önceki günlerde toplandı. Bu bölümde yeni bir API yoktur. Bundan sonra yazılan kodun haftalar sonra da okunması için birkaç kural konur. Airbnb, Standard ve Google kılavuzları uzundur. Burada o kılavuzların bu derslerde kullanılan özü durur.
+Yeni bir komut yoktur. Önceki günlerdeki araçlar, üç gün sonra da okunacak biçimde yazılır. Airbnb, Standard ve Google’ın kılavuzları uzundur. Burada o kılavuzların bu derslerde kullanılan özü vardır.
 
-Stil kavgası kişisel değil. Aynı repoda herkes aynı ritmi tutunca fark, fikre düşer. Noktalı virgül ve tırnak yüzünden dönen kod incelemesi zaman çalar.
+Aynı repoda herkes aynı ritmi tutunca tartışma fikre düşer. Noktalı virgül yüzünden dönen inceleme zaman çalar. Hangi ritim seçildiği, seçime sadık kalmaktan daha önemsizdir.
 
-## İsim
+## Ad
 
-Ne yaptığını söylesin. `d` değil, `siparisler`. Fonksiyon fiil: `hesaplaToplam`. Boolean soru gibi: `acikMi`, `stokVar`. Kısaltma yalnız herkesin bildiği yerde: `id`, `url`.
+Ne yaptığını söylesin.
 
-Döngü sayacı `i` olabilir. Başka bir işin değişkeni `i` olmasın.
+| Kötü | İyi | Neden |
+| --- | --- | --- |
+| `d` | `sehirler` | liste olduğu belli |
+| `hesapla` | `hesaplaToplam` | neyi hesapladığı belli |
+| `aktif` | `acikMi` | evet/hayır sorusu gibi |
+
+Kısaltma yalnız herkesin bildiği yerde durur: `id`, `url`. Döngü sayacı `i` olabilir. Başka bir işin değişkeni `i` olmasın. `x` bir şehir tutuyorsa adı `sehir` olsun.
 
 ## Değişken
 
-`const` varsayılan. Gerçekten yeniden atacaksan `let`. `var` yok. Kullanılmayan değişken durmasın. Sihirli sayıya isim ver:
+`const` varsayılandır. Gerçekten yeniden atanacaksa `let`. `var` yoktur. Kullanılmayan değişken durmaz. Anlamı gizli sayıya ad verilir.
 
 ```js
 const KDV = 0.2
-const kdvli = tutar * (1 + KDV)
+const kdvli = 100 * (1 + KDV)
 ```
 
-Bir satırda bir iş. `let a = 1, b = 2` yazmam.
+`100 * 1.2` de çalışır. 1.2’nin KDV olduğu ancak okuyan hatırlarsa bellidir. Sabit onu söyler.
+
+Bir satırda bir iş yapılır. `let a = 1, b = 2` yazılmaz.
 
 ## Fonksiyon
 
-Tek iş. Ekrana basmakla hesap yapmak ayrı fonksiyon olsun. Hesap saf kalsın, test edeyim. Uzunluk göz kararı: kaydırmaya başladıysam bölerim.
+Tek iş. Ekrana basmakla hesap yapmak ayrı fonksiyondur. Hesap saf kalır, konsolsuz denenebilir.
 
-Parametre üçü geçtiyse nesne geçir, 11. gündeki parçalamayla al. Sıra karışmasın.
-
-Erken çık. İç içe `if` büyürse önce olumsuz hali `return` et.
+Parametre üçü geçtiyse tek nesne geçirilir. 11. gündeki parçalama ile alınır. Sıra karışmaz.
 
 ```js
-function etiket(kisi) {
-  if (!kisi || !kisi.ad) return "Serhat"
-  return kisi.ad
+function etiket({ ad = "Serhat", sehir = "İzmir" }) {
+  return ad + ", " + sehir
 }
 ```
 
-## Dizi ve nesne
+İç içe `if` büyürse önce olumsuz hal `return` edilir. Buna erken çıkış denir.
 
-Diziyi `push` ile doldurmayı biliyorsun. Yeni liste üretiyorsan `map` ve `filter` daha az hata yapar. Orijinali bozan `sort` ve `splice` öncesi kopya aldığını düşün.
+```js
+function etiketYaz(kisi) {
+  if (!kisi || !kisi.ad) {
+    return "Serhat"
+  }
+  return kisi.ad + ", " + (kisi.sehir || "Van")
+}
 
-Nesne alanında tutarlı isim. Bir yerde `isim`, ötekinde `ad` olmasın. Aynı kavram tek kelime.
+console.log(etiketYaz(null))
+console.log(etiketYaz({ ad: "Serhat", sehir: "Trabzon" }))
+```
 
-## Koşul
+```text
+Serhat
+Serhat, Trabzon
+```
 
-`===` kullan. `==` ile tür zorlama bu derste yok.
+İlk kapı tutmazsa fonksiyon biter. İçeri giren dal daha az girintilidir.
 
-Boolean zaten boolean. `if (acikMi === true)` yerine `if (acikMi)`.
+## Liste, nesne, koşul
 
-`switch` kullanıyorsan `break`’siz düşmeyi bilerek yap ve yorum yaz. Bilmeden bırakma.
+Yeni liste üretilecekse `map` ve `filter` daha az hata yapar. Sayaç kaybolur. Asıl listeyi değiştiren `sort` ve `splice` öncesinde kopya alınır. 5. ve 9. günde nedeni görüldü.
 
-Üçlü operatörü tek bakışta okunmuyorsa `if`’e çevir.
+Aynı kavrama tek ad verilir. Bir yerde `isim`, ötekinde `ad` olmasın. Bu derslerde kişi adı `ad`, yer adı `sehir`dir.
 
-## Sınıf
+Eşitlik `===` iledir. `if (acikMi === true)` yerine `if (acikMi)` yazılır. Değer zaten `true` veya `false` ise ikinci kıyas gürültüdür.
 
-Kurucu alan atasın ve doğrulasın. İş metodda olsun. Kalıtım iki katı geçmesin. Daha derinleşiyorsa bileşime bak: “bu bir termosdur” demek yerine termosa bir kap nesnesi vermek. Her yerde miras açma.
+`switch`te `break`siz düşme bilerek yapılır ve yanına bir yorum konur. Üçlü operatör tek bakışta okunmuyorsa `if`e çevrilir.
 
-## Dosya
+## Sınıf ve dosya
 
-Bir dosya bir konu. `index.html` ince, kod `main.js` içinde. İsimler küçük harf ve tire: `sepet-listesi.js`. Senin klasörlerin de bu yüzden küçük.
+Kurucu alan atar ve doğrular. İş metodda durur. Kalıtım iki katı geçmez. Daha derinleşirse “bu ondan türer” yerine içine bir nesne konur. Her iş sınıfa girmek zorunda değildir.
 
-Yorum, *ne* yaptığını tekrar etmesin. Kod onu söylüyor. Yorum, *neden* öyle yaptığını söylesin. “ay 0’dan başlar, ekranda 1 göster” gibi.
+Bir dosya bir konu tutar. `index.html` ince, kod `main.js` içindedir. Dosya adı küçük harf ve tire olur: `sehir-listesi.js`.
+
+Yorum, kodun ne yaptığını tekrar etmez. Kod onu söyler. Yorum, *neden* öyle yapıldığını söyler. “ay 0’dan başlar, ekranda 1 göster” gibi.
 
 ## Biçim
 
 Bu rehberde şu ritim kullanılır:
 
 - girinti iki boşluk
-- satır sonuna noktalı virgül koymuyorum, dilin otomatik ekine güvenmiyorum diye değil; bu ders boyunca koymadım, karıştırmayalım
-- metinde tek tırnak ya da çift seçilir ve dosya boyunca değiştirilmez; bu derslerdeki örnekler çift tırnak kullanır
+- satır sonuna noktalı virgül konmaz
+- metin çift tırnak
 - süslü parantez aynı satırda açılır
-- satır 100 karakteri geçmesin, geçerse böl
+- satır 100 karakteri geçerse bölünür
 
-Hangi ritmi seçtiğin, seçimine sadık kalmandan daha önemsiz. Depoda bir biçim aracı (Prettier) varsa tartışmayı ona bırak.
+Seçilen araç Prettier ise tartışma ona bırakılır. El ile her dosyada başka ritim tutulmaz.
 
 ## Egzersizler
 
-1. Eski bir pratiğini aç. `var`, `==` ve anlamsız isim varsa düzelt.
-2. Hem konsola yazan hem indirim hesaplayan bir fonksiyonu ikiye böl.
-3. Üçten fazla parametreli bir fonksiyonu tek nesne parametresine çevir.
-4. İç içe üç `if`’i erken `return` ile düzleştir.
-5. Bir sihirli sayıyı isimli sabite çıkar.
-6. Kendine bir paragraf yaz: bundan sonraki projelerde hangi üç kuralı gevşetmeyeceksin. Dosyanın başına yorum diye koyma, README’ye üç madde olarak yaz.
+1. Eski bir alıştırmayı aç. `var`, `==` ve `d` gibi anlamsız ad varsa düzelt. Düzelmiş halini çalıştır, sonucun değişmediğini gör.
+2. Hem konsola yazan hem indirim hesaplayan bir fonksiyonu ikiye böl. `hesaplaIndirim(200, 0.1)` konsolsuz `180` dönsün.
+3. `kur(ad, sehir, yil, aktif)` fonksiyonunu tek nesne parametresine çevir. Çağrı `{ ad: "Serhat", sehir: "İstanbul", yil: 2026, aktif: true }` olsun.
+4. İç içe üç `if`i erken `return` ile düzleştir. Davranış aynı kalsın. İki çağrıyla dene.
+5. `fiyat * 1.18` içindeki `1.18`i `KDV` sabitine çıkar. Ad, oranın ne olduğunu söylesin.
+6. Bundan sonraki projelerde gevşemeyecek üç kuralı bir yere yaz. Dosyanın başına uzun yorum koyma. Üç madde yeter. Örnek: `const` varsayılan, `===`, fonksiyon tek iş.
 
 ---
 

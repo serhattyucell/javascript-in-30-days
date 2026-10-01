@@ -1,86 +1,145 @@
 # 16. Gün — JSON
 
-JSON, veriyi metin olarak taşımanın ortak biçimidir. Sunucu bu metni gönderir ve aynı biçimde alır. JavaScript nesnesine benzer ama dil değildir. Tırnak çifttir. Yorum yoktur. Sondaki virgül yasaktır. Anahtar da tırnaklıdır. Fonksiyon, `undefined` ve `symbol` taşınmaz.
+JSON, veriyi metin olarak taşımanın ortak biçimidir. Sunucu bu metni gönderir, tarayıcı aynı biçimde geri yollar. JavaScript nesnesine benzer ama dil değildir. Nesne bellekte durur. JSON bir metin dosyası gibi durur. İkisi aynı şey değildir.
 
-Örnek bir belge:
+Kurallar şunlardır:
+
+- Anahtar da değer de çift tırnak kullanır. Tek tırnak bozuktur.
+- Yorum yazılmaz.
+- Sondaki virgül yasaktır.
+- Fonksiyon, `undefined` ve `symbol` taşınmaz.
+
+Geçerli bir belge:
 
 ```json
 {
+  "ad": "Serhat",
   "sehir": "Van",
-  "acik": true,
-  "raflar": ["un", "tuz"],
-  "puan": null
+  "aktif": true,
+  "duraklar": ["İzmir", "Trabzon"],
+  "not": null
 }
 ```
 
+Bunu bir `.js` dosyasına yapıştırmak hata verir. JSON, `script` içinde çalışan kod değildir. Ya tırnak içinde metin olarak durur ya da `fetch` ile dosyadan gelir.
+
 ## Metinden nesneye
+
+`JSON.parse` metni nesneye çevirir.
 
 ```js
 const ham = '{"ad":"Serhat","sehir":"İzmir"}'
 const kisi = JSON.parse(ham)
-console.log(kisi.ad)
+console.log(kisi.sehir)
+console.log(typeof ham)
+console.log(typeof kisi)
 ```
 
-Bozuk metin `SyntaxError` fırlatır. Kullanıcıdan veya dosyadan geliyorsa `try/catch` koy.
+```text
+İzmir
+string
+object
+```
 
-`parse` ikinci argüman olarak bir dönüştürücü alır. Anahtar ve değeri görür; fonksiyon ne döndürürse o yazılır. `undefined` dönerse o alan düşer. Tarihi metin olarak alıp `Date` nesnesine çevirmek için kullanılır.
+`ham` hâlâ metindir. `kisi` artık nesnedir, noktayla alan okunur.
+
+Bozuk metin `SyntaxError` fırlatır. 14. gündeki `try/catch` ile sarılır.
 
 ```js
-const hamTarih = '{"gun":"2026-10-01"}'
+try {
+  JSON.parse("{ad:}")
+} catch (hata) {
+  console.log(hata.name)
+}
+```
+
+```text
+SyntaxError
+```
+
+Anahtar tırnaksız, bu yüzden bozuktur.
+
+`parse` ikinci argüman olarak bir dönüştürücü alır. Her alan oradan geçer. Fonksiyon ne döndürürse o yazılır. `undefined` dönerse alan düşer.
+
+```js
+const hamTarih = '{"gun":"2026-10-01","sehir":"Van"}'
 const kayit = JSON.parse(hamTarih, (anahtar, deger) => {
-  if (anahtar === "gun") return new Date(deger)
+  if (anahtar === "gun") {
+    return new Date(deger)
+  }
   return deger
 })
 console.log(kayit.gun.getFullYear())
 ```
 
+```text
+2026
+```
+
+`gun` metin olarak geldi, `Date`e çevrildi. `sehir` olduğu gibi döndü.
+
 ## Nesneden metne
 
+`JSON.stringify` nesneyi metne çevirir.
+
 ```js
-const dolap = { ad: "kiler", adet: 3, not: undefined }
+const dolap = { ad: "Serhat", sehir: "İstanbul", not: undefined }
 const metin = JSON.stringify(dolap)
 console.log(metin)
 ```
 
-`undefined` alan kaybolur. Fonksiyon kaybolur. `NaN` ve `Infinity` `null` olur.
-
-İkinci argüman filtre. Dizi verirsen yalnız o anahtarlar yazılır.
-
-```js
-console.log(JSON.stringify(dolap, ["ad"]))
+```text
+{"ad":"Serhat","sehir":"İstanbul"}
 ```
 
-Üçüncü argüman girinti. İnsan okusun diye 2 veririm. Tellere giderken boş bırakırım, dosya şişmesin.
+`undefined` alan kaybolur. Fonksiyon da kaybolur. `NaN` ve `Infinity` `null` olur.
+
+İkinci argüman filtredir. Liste verilirse yalnız o anahtarlar yazılır.
 
 ```js
-console.log(JSON.stringify(dolap, null, 2))
+console.log(JSON.stringify(dolap, ["sehir"]))
 ```
 
-Fonksiyon verirsen her alandan geçersin, `parse`’taki gibi. Şifre alanını dışarı sızdırmamak için birebir işe yarar:
+```text
+{"sehir":"İstanbul"}
+```
+
+Üçüncü argüman girintidir. İnsan okusun diye `2` verilir. Ağda giderken boş bırakılır, dosya şişmesin.
+
+```js
+console.log(JSON.stringify({ ad: "Serhat", sehir: "Trabzon" }, null, 2))
+```
+
+Fonksiyon verilirse her alandan geçilir. Şifre dışarı sızmasın diye o alan `undefined` döndürülür.
 
 ```js
 const hesap = { ad: "Serhat", sifre: "gizli" }
 const guvenli = JSON.stringify(hesap, (anahtar, deger) => {
-  if (anahtar === "sifre") return undefined
+  if (anahtar === "sifre") {
+    return undefined
+  }
   return deger
 })
+console.log(guvenli)
 ```
 
-## Nesne ile JSON aynı şey değil
+```text
+{"ad":"Serhat"}
+```
 
-Nesne bellekte durur. JSON bir metindir. `localStorage` yalnız metin saklar; bu yüzden 17. günde `stringify` ve `parse` birlikte kullanılır. `fetch` cevabı çoğu zaman JSON olarak gelir; 18. günde `response.json()` bu `parse` işini görür.
+`localStorage` yalnız metin saklar. 17. günde nesne önce `stringify`, okurken `parse` edilir. `fetch` cevabı çoğu zaman JSON gelir. 18. günde `response.json()` bu `parse` işini görür.
 
-Kopya almak için `JSON.parse(JSON.stringify(nesne))` derin kopya üretir. İçinde `Date`, `undefined`, fonksiyon veya dairesel bağ varsa bozulur. Küçük sade veride iş görür. Daha temizi `structuredClone`, tarayıcıda ve yeni Node’da var.
+`JSON.parse(JSON.stringify(nesne))` sade verinin derin kopyasını üretir. İçinde `Date`, `undefined` veya fonksiyon varsa bozulur. Tarayıcıda daha temizi `structuredClone`dur.
 
 ## Egzersizler
 
-1. Üç alanlı bir nesneyi güzel girintili JSON metnine çevir, konsola bas.
-2. O metni tekrar `parse` et, bir alanı değiştir, yeniden `stringify` et.
-3. Bozuk bir metni `parse` etmeyi dene, hatayı yakala.
-4. İçinde `undefined` ve bir fonksiyon olan nesneyi çevir. Metinde hangileri kayboldu, bak.
-5. `stringify` filtresiyle şifre alanını düşür.
-6. `parse` dönüştürücüsüyle `"aktif"` diye bir metin alanı görürsen onu booleana çevir.
-7. Bir dizi nesneyi JSON yap, uzunluğunu `metin.length` ile ölç. Sonra parse edip dizi uzunluğuyla karşılaştır.
+1. `{ ad: "Serhat", sehir: "Van", yil: 2026 }` nesnesini `JSON.stringify` ile 2 boşluk girintili metne çevir. Konsolda satır satır gör.
+2. O metni `parse` et. `sehir`i `"Trabzon"` yap. Yeniden `stringify` et. Eski metindeki Van’ın durduğunu, yeni metinde Trabzon olduğunu gör. `parse` kopya üretir, eski metin değişmez.
+3. `"{ad:Serhat}"` metnini `parse` et. Hatayı yakala, `name`in `SyntaxError` olduğunu yazdır.
+4. İçinde `not: undefined` ve `merhaba() {}` bulunan bir nesneyi çevir. Metinde ikisinin de kaybolduğunu gör.
+5. `stringify` filtresiyle `sifre` alanını düşür. Metinde `sifre` kelimesi geçmesin.
+6. `parse` dönüştürücüsüyle `"aktif"` anahtarının değeri `"evet"` ise `true`, `"hayir"` ise `false` yapsın. `{"aktif":"evet","sehir":"İzmir"}` dene. `kayit.aktif === true` olsun.
+7. Üç şehirlik bir nesne listesini JSON yap. `metin.length` ile karakter sayısını ölç. Sonra `parse` edip listenin `length`i 3 mü, bak. İki uzunluk aynı şey değildir. Biri karakter, biri öğe sayısıdır.
 
 ---
 

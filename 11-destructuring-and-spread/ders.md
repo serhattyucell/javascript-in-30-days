@@ -1,153 +1,236 @@
 # 11. Gün — Parçalama ve yayma
 
-Bu bölümde dizi ve nesne tek hamlede açılır. Parçalama, içinden seçip ad vermektir. Yayma, içini başka bir yere sermektir. Parçalamada süslü veya köşeli parantez vardır. Yaymada üç nokta vardır. Rest de üç nokta kullanır. Aynı işaret, durduğu yere göre anlam değiştirir.
+Liste ve nesne tek satırda açılabilir. Parçalama, içinden seçip ada bağlamaktır. Yayma, içini başka bir yere sermektir. Üç nokta ikisinde de vardır. Durduğu yere göre anlam değişir.
 
-## Diziyi parçalamak
+- Solda, parantezin içinde `...geri` duruyorsa toplar. Buna rest denir.
+- Yeni liste veya çağrı kurarken duruyorsa serer. Buna yayma denir.
+
+## Listeyi parçalamak
 
 Soldan sağa eşleşir.
 
 ```js
-const renk = ["mavi", "sarı", "yeşil", "mor"]
-const [ilk, ikinci] = renk
-console.log(ilk, ikinci)
+const sehirler = ["İzmir", "Van", "İstanbul", "Trabzon"]
+const [ilk, ikinci] = sehirler
+console.log(ilk)
+console.log(ikinci)
 ```
 
-Atlamak için boş virgül:
-
-```js
-const [, , ucuncu] = renk
+```text
+İzmir
+Van
 ```
 
-Varsayılan:
+Atlamak için boş virgül konur. Varsayılan, o sıra yoksa devreye girer.
 
 ```js
-const [a = "yok", b = "yok"] = ["sadece-bu"]
-console.log(a, b)
+const [, , ucuncu] = sehirler
+console.log(ucuncu)
+
+const [a = "yok", b = "yok"] = ["İzmir"]
+console.log(a)
+console.log(b)
 ```
 
-Kalanı rest ile topla. Rest sonuncu olmak zorunda.
+```text
+İstanbul
+İzmir
+yok
+```
+
+Kalan rest ile toplanır. Rest sonuncu olmak zorundadır. Ortada duramaz.
 
 ```js
-const [bas, ...geri] = renk
+const [bas, ...geri] = sehirler
+console.log(bas)
 console.log(geri)
 ```
 
-Takas, geçici değişken olmadan:
-
-```js
-let sol = "bardak"
-let sag = "tabak"
-;[sol, sag] = [sag, sol]
+```text
+İzmir
+["Van", "İstanbul", "Trabzon"]
 ```
 
-Fonksiyon birden fazla değer döndürmek istediğinde dizi döndürür, çağıran parçalar.
+İki değişkenin değerini takas etmek için üçüncü bir değişken gerekmez.
 
 ```js
-function enKucukVeBuyuk(liste) {
+let sol = "Van"
+let sag = "Trabzon"
+;[sol, sag] = [sag, sol]
+console.log(sol)
+console.log(sag)
+```
+
+```text
+Trabzon
+Van
+```
+
+Satırın başındaki noktalı virgül, bir önceki satır parantezsiz bittiyse yapışmasın diyedir. Ayrı satırda şaşırmazsan koyma.
+
+Fonksiyon birden fazla değer döndürmek istiyorsa liste döndürür. Çağıran parçalar.
+
+```js
+function uclar(liste) {
   const sirali = liste.slice().sort((x, y) => x - y)
   return [sirali[0], sirali[sirali.length - 1]]
 }
 
-const [min, max] = enKucukVeBuyuk([4, 9, 1])
+const [kucuk, buyuk] = uclar([4, 9, 1])
+console.log(kucuk)
+console.log(buyuk)
 ```
 
-Döngüde de işe yarar. `entries` çift üretir:
+```text
+1
+9
+```
+
+Döngüde de aynı açılış vardır:
 
 ```js
 for (const [sira, ad] of ["İzmir", "Van"].entries()) {
-  console.log(sira, ad)
+  console.log(sira + " " + ad)
 }
+```
+
+```text
+0 İzmir
+1 Van
 ```
 
 ## Nesneyi parçalamak
 
-İsim, anahtarla aynı olmalı. Sıra önemsiz.
+Ad, anahtarla aynı olmalıdır. Sıra önemsizdir.
 
 ```js
 const kayit = { ad: "Serhat", sehir: "İstanbul", aktif: true }
 const { ad, sehir } = kayit
+console.log(ad)
+console.log(sehir)
 ```
 
-Yeniden adlandırmak:
+```text
+Serhat
+İstanbul
+```
+
+Yeniden adlandırmak, iki noktanın sağındaki yeni addır.
 
 ```js
 const { ad: kisi, sehir: yer } = kayit
+console.log(kisi)
+console.log(yer)
 ```
 
-Varsayılan, anahtar yoksa devreye girer. `undefined` sayılır, `null` sayılmaz.
+```text
+Serhat
+İstanbul
+```
+
+`ad` değişkeni kurulmaz. Kurulan ad `kisi`dir.
+
+Varsayılan, anahtar yoksa veya değeri `undefined` ise devreye girer. `null` varsayılanı ezmez. `null` bir değerdir.
 
 ```js
 const { not = "yok" } = kayit
+console.log(not)
 ```
 
-İç içe:
+```text
+yok
+```
+
+İç içe nesne de açılır. Önce dış kapı, sonra iç kapı yazılır.
 
 ```js
 const siparis = { masa: 4, hesap: { tutar: 180, bahsis: 20 } }
 const {
   hesap: { tutar },
 } = siparis
+console.log(tutar)
 ```
 
-## Parametrede parçalama
+```text
+180
+```
 
-Fonksiyon nesne bekliyorsa, gövdede `siparis.ad` yazmak yerine parametreyi açarım. Hangi alanı kullandığım kapıda görünür.
+## Parametrede parçalamak
+
+Fonksiyon nesne bekliyorsa gövdede `siparis.ad` yazmak yerine parametre açılır. Hangi alanın kullanıldığı kapıda görünür. Kullanılmayan alan sessizce durur.
 
 ```js
-function fis({ ad, tutar }) {
-  return `${ad}: ${tutar}`
+function etiket({ ad, sehir }) {
+  return ad + ", " + sehir
 }
 
-console.log(fis({ ad: "çay", tutar: 30, ekstra: true }))
+console.log(etiket({ ad: "Serhat", sehir: "Van", ekstra: true }))
 ```
 
-Kullanmadığım `ekstra` sessizce durur.
+```text
+Serhat, Van
+```
 
 ## Yayma
 
-Üç nokta, değeri yerinde açar. Kopya üretirken ve birleştirirken kullanılır. Kopya sığdır: içteki nesneler paylaşılır.
-
-Dizi:
+Üç nokta, değeri yerinde açar. Liste kopyalanır ve birleştirilir. Kopya sığdır. İçteki nesneler paylaşılır.
 
 ```js
-const a = [1, 2]
-const b = [3, 4]
+const a = ["İzmir", "Van"]
+const b = ["İstanbul", "Trabzon"]
 const birlikte = [...a, ...b]
 const kopya = [...a]
-kopya.push(9)
+kopya.push("İstanbul")
 console.log(a)
+console.log(birlikte)
 ```
 
-Fonksiyon argümanına sermek:
+```text
+["İzmir", "Van"]
+["İzmir", "Van", "İstanbul", "Trabzon"]
+```
+
+`a` değişmedi. `push` kopyaya gitti.
+
+Fonksiyon argümanına sermek, listedeki sayıları tek tek vermekle aynıdır.
 
 ```js
 const notlar = [8, 3, 11]
 console.log(Math.max(...notlar))
 ```
 
-Nesne:
+```text
+11
+```
+
+`Math.max(notlar)` çalışmaz. `Math.max` sayı ister, liste istemez. Üç nokta listeyi `8, 3, 11` diye açar.
+
+Nesne de serilir. Aynı anahtar iki kez gelirse **sonraki kazanır**.
 
 ```js
-const temel = { renk: "gri", boy: 10 }
-const ozel = { ...temel, renk: "mavi" }
+const temel = { ad: "Serhat", sehir: "İzmir" }
+const ozel = { ...temel, sehir: "Trabzon" }
 console.log(ozel)
 console.log(temel)
 ```
 
-Aynı anahtar iki kez gelirse **sonraki kazanır**. `{ ...yeni, ...eski }` yazarsan eski, yeninin üstünü ezer. Sırayı bilerek seç.
+```text
+{ ad: "Serhat", sehir: "Trabzon" }
+{ ad: "Serhat", sehir: "İzmir" }
+```
 
-Rest, toplar. Yayma, serer. Sağda `...geri` duruyorsa rest. Çağrıda veya yeni dizi/nesne kurarken duruyorsa yayma.
+`temel` durur. `ozel` yeni bir nesnedir. `sehir` sonra yazıldığı için Trabzon, İzmir’in üstüne yazar.
 
 ## Egzersizler
 
-1. Üç elemanlı bir diziden ilk ikisini ayrı değişkenlere al. Üçüncüyü rest ile tut.
-2. İki değişkenin değerini parçalama ile takas et.
-3. Bir kişi nesnesinden `ad` ve `sehir` çıkar. `sehir` yoksa `"bilinmiyor"` olsun.
+1. `["İzmir", "Van", "İstanbul", "Trabzon"]` içinden ilk ikisini ayrı değişkenlere al. Üçüncü ve dördüncüyü `...geri` ile tut. `geri.length` 2 olsun.
+2. `sol = "Van"`, `sag = "İstanbul"` olsun. Parçalama ile takas et. `sol` İstanbul olmalıdır.
+3. `{ ad: "Serhat" }` nesnesinden `ad` ve `sehir` çıkar. `sehir` yoksa `"bilinmiyor"` olsun.
 4. `ad` alanını `tamAd` diye yeniden adlandırarak parçala.
-5. İki nesneyi yayma ile birleştir. Ortak alanda sonrakinin kazandığını göster.
-6. Bir dizi kopyasına eleman ekle, aslının değişmediğini yazdır.
-7. `Math.min` içine bir sayı dizisini yay.
-8. Parametresi parçalanmış bir `etiket({ ad, fiyat })` fonksiyonu yaz.
+5. `{ sehir: "İzmir", yil: 2020 }` ile `{ sehir: "Van" }` nesnelerini yayma ile birleştir. `sehir` Van kalsın, `yil` kaybolmasın. Sıra önemli. Van’ı sona yaz.
+6. Bir listenin kopyasına şehir ekle. Asıl listenin uzunluğunun değişmediğini yazdır.
+7. `Math.min(...[8, 3, 11])` dene. Sonuç `3` olsun. Üç noktasız `Math.min([8, 3, 11])` dene. `NaN` gör. Nedenini bir cümle yaz.
+8. `etiket({ ad, sehir })` fonksiyonu yaz. `Serhat, Trabzon` döndürsün.
 
 ---
 

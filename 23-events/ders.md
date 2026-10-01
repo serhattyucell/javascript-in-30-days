@@ -1,26 +1,28 @@
 # 23. Gün — Olaylar
 
-Sayfa dururken bir işin başlamasını olay dinleyicisi sağlar. Tıklama, yazı, tuş, fare ve formun gönderilmesi buna girer. Önceki günde bir `click` görüldü. Bu bölümde dinleyici kurulur, hedef okunur ve olayın yukarı yürümesi yönetilir.
+Sayfa dururken bir işin başlamasını olay dinleyicisi sağlar. Tıklama, yazı, tuş, fare, formun gönderilmesi buna girer. 22. günde bir `click` vardı. Bu gün dinleyici kurulur, hangi öğenin tıklandığı okunur, olayın yukarı yürümesi yönetilir.
 
 ```js
 const dugme = document.querySelector("#ekle")
+
 function bildir() {
   console.log("tık")
 }
+
 dugme.addEventListener("click", bildir)
 ```
 
-Kaldırmak için aynı fonksiyon referansı lazım. Anonim ok fonksiyonunu sonra `removeEventListener` ile sökemezsin, elde isim yoktur.
+Düğmeye her basışta konsola `tık` düşer. Kaldırmak için aynı fonksiyon gerekir. Anonim ok sonradan sökülemez, elde isim yoktur.
 
 ```js
 dugme.removeEventListener("click", bildir)
 ```
 
-HTML’deki `onclick="..."` özniteliğini kullanmıyorum. Kod HTML’den ayrık kalsın.
+HTML’deki `onclick="..."` kullanılmaz. Kod HTML’den ayrı kalır.
 
 ## Olay nesnesi
 
-Dinleyici bir nesne alır. İçinde ne oldu, hangi tuş, hangi hedef var.
+Dinleyici bir nesne alır. Ne olduğu, hangi tuş, hangi hedef oradadır.
 
 ```js
 dugme.addEventListener("click", (olay) => {
@@ -29,12 +31,15 @@ dugme.addEventListener("click", (olay) => {
 })
 ```
 
-`target` olayı ilk alan düğüm. `currentTarget` dinleyiciyi taşıyan düğüm. İç içe etikette ikisi ayrılır. Bir listenin tek dinleyicisi varsa çocuğun tıklanmasında `target` çocuk, `currentTarget` listedir. Buna olayın yukarı yürümesi denir.
+`type` `"click"` olur. `target` olayı ilk alan düğümdür. `currentTarget` dinleyiciyi taşıyan düğümdür. İç içe etikette ikisi ayrılır. Listenin tek dinleyicisi varken çocuğa tıklanınca `target` çocuk, `currentTarget` liste olur. Olay çocukta başlar, yukarı yürür. Buna kabarcıklanma denir.
 
 ## Girdi
 
 ```html
-<input id="arama" type="search" placeholder="ürün" />
+<label>
+  Şehir
+  <input id="arama" type="search" />
+</label>
 <p id="yansima"></p>
 ```
 
@@ -47,63 +52,75 @@ arama.addEventListener("input", () => {
 })
 ```
 
-`input` her tuşta gelir. `change` kutudan çıkınca gelir. Canlı yansıma istiyorsan `input`.
+Kutuya `Van` yazıldıkça alttaki paragraf da `Van` olur. `input` her tuşta gelir. `change` kutudan çıkınca gelir. Canlı yansıma `input` ile kurulur.
 
-Formda `submit` sayfayı yeniler. Yenilenmesin istiyorsan `preventDefault`.
+Form `submit` olunca sayfa yenilenir. Yenilenmesin deniyorsa `preventDefault` çağrılır.
 
 ```js
 document.querySelector("form").addEventListener("submit", (olay) => {
   olay.preventDefault()
+  console.log("form gitti sayılmadı, sayfa durdu")
 })
 ```
 
+`preventDefault` olmazsa konsol iletisi bir an görünür, sayfa yenilenir, konsol temizlenir. İleti kaybolursa engelleme unutulmuştur.
+
 ## Tuş ve fare
 
-`keydown` basılınca, `keyup` bırakılınca. `olay.key` insanın okuduğu tuş (`"Enter"`, `"a"`). `olay.code` fiziksel tuş. Türkçe klavyede ikisini karıştırma: `key` karaktere, `code` konuma yakındır.
+`keydown` basılınca, `keyup` bırakılınca gelir. `olay.key` insanın okuduğu tuştur: `"Enter"`, `"a"`. `olay.code` fiziksel konumdur. Türkçe klavyede ikisi ayrı olabilir.
 
 ```js
 document.addEventListener("keydown", (olay) => {
+  if (olay.target.matches("input, textarea")) {
+    return
+  }
   if (olay.key === "Escape") {
     console.log("kaçış")
   }
 })
 ```
 
-Fare: `click`, `dblclick`, `mouseenter`, `mouseleave`, `mousemove`. `mousemove` çok sık gelir. Ağır iş bağlama.
+Odak bir kutudayken Escape sayfanın dinleyicisine de düşer. Kutunun içindeyken karışmasın deniyorsa `target` bir `input` ise erken çıkılır. Yukarıdaki `matches` bunu yapar.
 
-## Taşma
+Fare: `click`, `dblclick`, `mouseenter`, `mouseleave`, `mousemove`. `mousemove` çok sık gelir. Ağır iş bağlanmaz.
 
-Yüz kartın her birine ayrı dinleyici takma. Üst kutuya bir tane tak, `target` ile hangi kart olduğunu anla.
+## Tek dinleyici, çok çocuk
+
+Yüz kartın her birine ayrı dinleyici takılmaz. Üst kutuya bir tane takılır. `target` hangi kart olduğunu söyler. Sonradan eklenen kart da bu dinleyiciye düşer. 22. günde üretilen düğümler için bu yol daha sağlamdır.
 
 ```js
 liste.addEventListener("click", (olay) => {
   const kart = olay.target.closest("li")
-  if (!kart || !liste.contains(kart)) return
+  if (!kart || !liste.contains(kart)) {
+    return
+  }
   kart.remove()
 })
 ```
 
-Sonradan eklenen kartlar da bu dinleyiciye düşer. Dün ürettiğin düğümler için özellikle iyi.
+`closest("li")` tıklanan yerden yukarı, ilk `li`yi bulur. Maddeye basılınca o satır silinir. Boşluğa basılırsa `kart` yoktur, fonksiyon döner.
 
 ## Egzersizler
 
-### Sayı kutuları, bu kez tıklanınca
+### Sayı kutuları
 
-22. günün ızgarasını aç. Kutuya tıklanınca üstte tek bir satır “seçilen: 17” desin. Yüz dinleyici yok. Izgara kabına bir dinleyici, `closest` ile kutu.
+22. günün ızgarasını aç. Kutuya tıklanınca üstte tek bir satır `seçilen: 17` desin. Yüz dinleyici yok. Izgara kabına bir dinleyici, `closest` ile kutu.
 
-Bir de üç düğme koy: yalnız çiftleri, yalnız tekleri, yalnız asalları göster. Ötekilere `hidden` özniteliği veya bir sınıf ver.
+Üç düğme daha koy: yalnız çiftler, yalnız tekler, yalnız asallar. Ötekilere `hidden` özniteliği ver. `hidden` olan kutu ekrandan gider. Düğme yeniden basılınca `hidden` kalksın, hepsi görünsün.
 
 ### Tuş kartı
 
-Sayfada büyük bir alan olsun. Bir tuşa basınca o alan üç şeyi göstersin: `key`, `code`, ve basılı tutuluyorsa “tekrar” yazısı (`olay.repeat`). Escape temizlesin.
-
-Girdi kutusunun içindeyken de sayfanın dinleyicisi çalışır. İstemiyorsan `olay.target` bir `input` ise erken çık.
+Sayfada büyük bir alan olsun. Bir tuşa basınca o alan üç şeyi göstersin: `key`, `code`, ve basılı tutuluyorsa “tekrar”. `olay.repeat` basılı tutmayı söyler. Escape alanı temizlesin. Odak bir `input` içindeyse sayfanın dinleyicisi karışmasın. Yukarıdaki erken çıkışı kullan.
 
 ### Canlı süzgeç
 
-Bir ürün dizisi ve bir arama kutusu. Her `input` olayında listeyi `replaceChildren` ile yeniden kur. Metin, ürün adının içinde geçiyorsa kart kalsın. Büyük küçük harfi `toLocaleLowerCase("tr-TR")` ile eşitle.
+```js
+const sehirler = ["İzmir", "Van", "İstanbul", "Trabzon"]
+```
 
-Arama boşsa hepsi görünsün. Eşleşme yoksa tek bir “yok” paragrafı bas.
+Bir arama kutusu. Her `input` olayında listeyi `replaceChildren` ile yeniden kur. Metin, şehir adının içinde geçiyorsa kart kalsın. Karşılaştırma `toLocaleLowerCase("tr-TR")` ile olsun. `İ` ve `i` karışmasın.
+
+Arama boşsa dördü de görünsün. Eşleşme yoksa tek bir “yok” paragrafı bas. `zz` yazınca “yok”, silince dört şehir geri gelsin.
 
 ---
 

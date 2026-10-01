@@ -2,14 +2,14 @@
 
 Bu repo, JavaScript’i sıfırdan otuz günde öğrenmek için hazırlanmış bir rehberdir. Her gün tek bir konu işlenir. İlk günden başlanır, bir gün bitmeden sonrakine geçilmez.
 
-## Nasıl ilerlersin
+## Nasıl ilerlenir
 
-1. [1. gün](./01-introduction/ders.md) ile başla.
-2. Günün sonundaki pratikleri kendin yaz. Cevabı bakmadan dene.
+1. [1. gün](./01-introduction/ders.md) ile başla. Her kod bloğunu Chrome konsoluna yapıştır. Bloğun altında yazan sonuç sende de aynı çıkmalıdır. Çıkmıyorsa bir satır geri dön.
+2. Günün sonundaki işleri kendin yaz. Cevabı okumadan dene.
 3. Sayfanın altındaki bağlantıdan ertesi güne geç.
-4. Günde bir ders yetiyor. Takıldığın yerde o günü ertesi sabah bir daha oku.
+4. Bir günde bir konu yeter. Takılırsan o günü ertesi sabah baştan, örnekleri yeniden çalıştırarak oku.
 
-Kodları tarayıcı konsolunda deneyebilirsin. Chrome’da `F12`, sonra **Console**. Daha uzun işler için bir klasör aç, içine `index.html` ve `main.js` koy, dosyayı tarayıcıda aç. Editör olarak Visual Studio Code yeterli.
+Konsol: Chrome’da `F12`, sonra **Console**. Enter kodu çalıştırır. Sayfada görünmesi gereken işler için bir klasör aç, içine `index.html` ve `main.js` koy. Editör olarak Visual Studio Code yeter.
 
 ## Günler
 

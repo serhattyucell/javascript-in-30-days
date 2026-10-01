@@ -1,6 +1,6 @@
 # 7. Gün — Fonksiyonlar
 
-Fonksiyon, adı olan bir iş paketidir. Aynı hesap üç yerde kopyalanmaz; bir kez yazılır ve adıyla çağrılır. Girdiye parametre, çıktıya dönüş değeri denir.
+Aynı hesabı üç yerde kopyalamak, biri değişince üçünü de aramaktır. Fonksiyon, adı olan bir iş paketidir. Bir kez yazılır, adıyla çağrılır. İçeri giren değere parametre, dışarı çıkan değere dönüş denir.
 
 ## Bildirim
 
@@ -12,21 +12,48 @@ function selam(kisi, sehir) {
 console.log(selam("Serhat", "Trabzon"))
 ```
 
-`return` yoksa fonksiyon `undefined` bırakır. `return` sonrasındaki satırlar çalışmaz. Fonksiyon orada biter.
+```text
+Serhat, Trabzon
+```
 
-## İfadeye bağlamak
+`function` anahtarı, `selam` adı, parantezdeki iki parametre ve süslü gövde tanımdır. Tanım kendi başına çalışmaz. `selam("Serhat", "Trabzon")` çağrıdır. `"Serhat"` , `kisi`nin yerine geçer. `"Trabzon"` , `sehir`in yerine geçer. Sıra önemlidir. Ters yazılırsa şehir adın yerine geçer.
 
-Fonksiyon bir değişkene atanabilir. Bu biçimde satır, tanımın üstünden önce çalışmaz. Klasik `function` bildirimi dosyada yukarı taşınır, tanımdan önce de çağrılabilir. Yeni kodda değişken ve ok fonksiyonu tercih edilir; sıra, dosyada görülen sıradır.
+`return` sonucu dışarı bırakır. Ondan sonraki satır çalışmaz. `return` yoksa fonksiyon `undefined` bırakır.
+
+```js
+function sus() {
+  console.log("içeriden")
+}
+
+console.log(sus())
+```
+
+```text
+içeriden
+undefined
+```
+
+İleti basıldı ama fonksiyon bir değer döndürmedi. `console.log`un içindeki ikinci satır o yüzden `undefined`dir. Ekrana basmak ile değer döndürmek ayrı iştir. Hesap yapan fonksiyon bassın diye değil, sonucu geri versin diye yazılır. Basma işini çağıran taraf yapar.
+
+## Değişkene bağlamak
+
+Fonksiyon bir değişkene de konur. Bu biçimde, satırın üstünden çağrılamaz. Klasik `function selam` bildirimi dosyada yukarı taşınır, tanımdan önce de çağrılabilir. Yeni kodda aşağıdaki biçim tercih edilir. Ne zaman kurulduğu dosyada görülen sıradır.
 
 ```js
 const kare = function (n) {
   return n * n
 }
+
+console.log(kare(6))
 ```
 
-## Parametre
+```text
+36
+```
 
-Parantezdeki ad, çağrıda verilecek değerin yer tutucusudur. Sıra önemlidir.
+## Parametre ve varsayılan
+
+Eksik argüman `undefined` gelir. Fazlası yok sayılır.
 
 ```js
 function indir(fiyat, oran) {
@@ -36,22 +63,31 @@ function indir(fiyat, oran) {
 console.log(indir(200, 0.1))
 ```
 
-Eksik argüman `undefined` gelir. Fazla argüman yok sayılır.
-
-Varsayılan değer verilebilir. Argüman gelmezse o kullanılır.
-
-```js
-function fincan(adet = 1, tur = "çay") {
-  return `${adet} ${tur}`
-}
-
-console.log(fincan())
-console.log(fincan(2, "kahve"))
+```text
+180
 ```
 
-## Sınırsız argüman
+200’ün yüzde 10’u 20’dir. 200’den 20 düşünce 180 kalır.
 
-Kaç değer geleceği bilinmiyorsa rest parametresi kullanılır. Üç noktadan sonraki ad bir dizidir. Rest, son parametre olmak zorundadır.
+Argüman unutulursa varsayılan devreye girer.
+
+```js
+function yer(kisi = "Serhat", sehir = "İzmir") {
+  return `${kisi}, ${sehir}`
+}
+
+console.log(yer())
+console.log(yer("Serhat", "Van"))
+```
+
+```text
+Serhat, İzmir
+Serhat, Van
+```
+
+## Kaç tane geleceği bilinmiyorsa
+
+Üç nokta, gelenlerin hepsini bir listeye toplar. Buna rest denir. Son parametre olmak zorundadır.
 
 ```js
 function toplam(...sayilar) {
@@ -63,29 +99,55 @@ function toplam(...sayilar) {
 }
 
 console.log(toplam(4, 5, 6, 7))
+console.log(toplam())
 ```
+
+```text
+22
+0
+```
+
+Hiç argüman gelmezse liste boştur, döngü dönmez, `sonuc` 0 kalır.
 
 Eskiden `arguments` adlı gizli bir liste vardı. Ok fonksiyonunda o yoktur. Yeni kodda `...` kullanılır.
 
 ## Ok fonksiyonu
 
-Kısa yazımıdır. Tek ifadede `return` ve süslü parantez düşer.
+Aynı işin kısa yazılışıdır. Tek ifadede `return` ve süslü parantez düşer.
 
 ```js
 const ikiKat = (n) => n * 2
-const bol = (a, b) => {
-  if (b === 0) return "bölünmez"
-  return a / b
-}
+console.log(ikiKat(8))
 ```
 
-Tek parametrede parantez de düşebilir: `n => n * 2`. Okunaklılık için parantez durabilir.
+```text
+16
+```
 
-Ok fonksiyonu ile klasik fonksiyon `this` bağında ayrılır. Ayrım, sınıflar bölümünde görünür. Kısa işlerde ok, nesnenin kendi metodunda klasik fonksiyon yazılır.
+Gövde bir satırdan uzunsa süslü parantez ve `return` geri gelir.
 
-## Kendi kendine çalışan
+```js
+const bol = (a, b) => {
+  if (b === 0) {
+    return "bölünmez"
+  }
+  return a / b
+}
 
-Tanımlandığı anda bir kez çalışır. Ad vermek gerekmez. Eski kodda kapsam kirletmemek için kullanılırdı. Modül aynı işi görür; ara sıra tek seferlik kurulumda rastlanır.
+console.log(bol(10, 2))
+console.log(bol(10, 0))
+```
+
+```text
+5
+bölünmez
+```
+
+Tek parametrede parantez de düşebilir: `n => n * 2`. Okunaklılık için parantez durabilir. Ok fonksiyonu ile klasik fonksiyon `this` bağında ayrılır. Ayrım 8. ve 15. günde görünür. Kısa hesapta ok, nesnenin kendi metodunda klasik fonksiyon yazılır.
+
+## Kendi kendine bir kez çalışan
+
+Tanımlandığı anda bir kez çalışır. Adı yoktur. Eski kodda kapsam kirletmemek için kullanılırdı. Sık gerekmez. Biçimi görmek yeter.
 
 ```js
 ;(function () {
@@ -94,32 +156,42 @@ Tanımlandığı anda bir kez çalışır. Ad vermek gerekmez. Eski kodda kapsam
 })()
 ```
 
-## Anonim ve geri çağırma
+```text
+7
+```
 
-Adı olmayan fonksiyon, çoğu zaman başka bir fonksiyona argüman olur. Adı geri çağırma (callback) dur. 9. gün bu konudadır.
+Sondaki `()` çağrıdır. Olmazsa fonksiyon hiç çalışmaz, yalnızca kurulur.
+
+## Başka fonksiyona vermek
+
+Fonksiyon da bir değerdir. Başka fonksiyona argüman olabilir. Verilen fonksiyona geri çağırma denir. 9. gün tamamı budur.
 
 ```js
 function calistir(is) {
   is()
 }
 
-calistir(() => console.log("geldim"))
+calistir(() => console.log("Serhat"))
 ```
 
-## İpucu
+```text
+Serhat
+```
 
-Fonksiyon tek bir iş yapar. Adı fiildir: `hesaplaIndirim`, `okuStok`. Birden fazla iş yapan fonksiyon bölünür. Ara sonuca da ad verilir; anlamsız sayı bırakılmaz.
+`calistir` işin ne olduğunu bilmez. Kendisine verilen fonksiyonu çağırır.
+
+Fonksiyon tek iş yapar. Adı fiildir: `hesaplaIndirim`, `yazSehir`. Hem hesaplayıp hem konsola basan fonksiyon ikiye bölünür.
 
 ## Egzersizler
 
-1. Verilen sayının karesini döndüren `kare` yazın.
-2. İki metni arada boşlukla birleştiren `birlestir` yazın. İkinci metin gelmezse yalnızca ilkini döndürsün. Deneme değerleri `Serhat` ve `İstanbul` olsun.
-3. Sınırsız sayı alıp ortalamasını döndüren bir fonksiyon yazın. Eleman yoksa `0` döndürün.
-4. Aynı işi ok fonksiyonuyla yazın.
-5. Bir dizideki en büyük sayıyı döndüren fonksiyon yazın. Döngü kullanın. İkinci çözümde `Math.max(...dizi)` deneyin.
-6. `selamla` adlı bir fonksiyon yazın. İçine verilen fonksiyonu kişi adıyla çağırsın.
-7. Fiyata KDV ekleyen bir fonksiyon yazın. Oran varsayılan `0.2` olsun.
-8. `return` koymadan bir fonksiyon çağırın. Gelen değerin `undefined` olduğunu görün.
+1. `kare(n)` yaz. `kare(5)` sonucu `25` olsun. Fonksiyon konsola basmasın, `return` etsin. Basma işini dışarıdaki `console.log` yapsın.
+2. `birlestir(a, b)` iki metni arada boşlukla birleştirsin. `b` gelmezse yalnız `a` dönsün. `birlestir("Serhat", "İstanbul")` ve `birlestir("Serhat")` dene.
+3. `ortalama(...sayilar)` yaz. Toplamı uzunluğa böl. Liste boşsa `0` dönsün, sıfıra bölme olmasın.
+4. Aynı ortalamayı ok fonksiyonuyla yaz.
+5. Bir listedeki en büyük sayıyı döndüren fonksiyon yaz. Döngü kullan. İkinci çözüm `Math.max(...liste)` olsun. `[3, 11, 7]` ile ikisini de dene, ikisi de `11` vermeli.
+6. `uygula(kisi, is)` yaz. `is` bir fonksiyon olsun ve `kisi` ile çağrılsın. `uygula("Serhat", (ad) => console.log(ad + ", Van"))` dene.
+7. `kdvEkle(fiyat, oran = 0.2)` yaz. `kdvEkle(100)` sonucu `120` olsun. `kdvEkle(100, 0.1)` sonucu `110` olsun.
+8. `return` koymadan bir fonksiyon çağır, sonucu `console.log`a ver. `undefined` gör.
 
 ---
 

@@ -1,31 +1,33 @@
 # 13. Gün — Konsol metodları
 
-`console.log` düz değer basmak için yeter. Nesne dizisi, süre ölçümü, grup, uyarı ve doğrulama için konsolun başka metodları vardır. Tarayıcının geliştirici aracında bunlar renklidir. Node’da da çoğu çalışır; renkler daha sönüktür.
+`console.log` bir değeri basar. Nesne listesi, süre, grup ve “bu iddia yanlışsa bağır” için başka kapılar vardır. Tarayıcının geliştirici aracında renklenir. Node’da da çoğu vardır, renkler daha sönüktür.
 
-## log, info, warn, error
+Hepsi sayfada görünmez. Öğrenirken ve hata ararken kullanılır. Biten uygulamada konsola bırakılmaz.
+
+## log, warn, error
 
 ```js
 console.log("akış")
-console.info("bilgi, genelde log ile aynı yere düşer")
 console.warn("stok az")
 console.error("kayıt yazılamadı")
 ```
 
-`error` kırmızı, `warn` sarıdır. Beklenen durum `log`, dikkat isteyen durum `warn`, işi kıran durum `error` ile yazılır.
+`error` kırmızı, `warn` sarıdır. Beklenen durum `log`, dikkat isteyen durum `warn`, işi kıran durum `error` ile yazılır. Sayfa kaydırılırken kırmızı satır kaybolmaz.
 
-## Birden fazla değer ve yer tutucu
+Şablon metin yeni kodda tercih edilir. Eski yer tutucuyu tanımak için bir örnek yeter. `%s` metin, `%d` sayıdır.
 
 ```js
 const ad = "Serhat"
 const puan = 88
 console.log("%s puanı %d", ad, puan)
+console.log(`${ad} puanı ${puan}`)
 ```
 
-`%s` metin, `%d` sayı, `%o` nesnedir. Şablon metin de aynı işi görür ve yeni kodda o tercih edilir. Yer tutucu, eski örneklerde karşılaşıldığı için burada da durur.
+İki satır da `Serhat puanı 88` basar.
 
 ## table
 
-Dizi ve nesne listesinde `log` bir duvar basar. `table` sütun açar.
+Nesne listesinde `log` tek bir yığın basar. `table` sütun açar.
 
 ```js
 const kisiler = [
@@ -33,72 +35,73 @@ const kisiler = [
   { ad: "Serhat", sehir: "Van" },
 ]
 console.table(kisiler)
+console.table(kisiler, ["sehir"])
 ```
 
-İkinci argüman, görmek istediğin sütunların listesi olabilir: `console.table(kisiler, ["ad"])`.
+Konsolda iki sütunlu bir tablo görünür. İkinci çağrı yalnız `sehir` sütununu bırakır. Liste boşsa tablo da boştur. Hata değildir.
 
 ## assert
 
-İddia doğruysa susar. Yanlışsa hata basar. Testin küçük kardeşi.
+İddia doğruysa susar. Yanlışsa hata basar.
 
 ```js
 const stok = 0
 console.assert(stok > 0, "stok bitti", { stok })
 ```
 
-Koşul `true` ise konsol temiz kalır.
+`stok` 0 olduğu için koşul yanlıştır. Konsolda “stok bitti” ve `{ stok: 0 }` görünür. `stok` 3 yapılırsa satır susar. Susmak, iddianın tuttuğu anlamına gelir.
 
 ## time
 
-İki nokta arası süreyi ölçerim. İsimler eşleşmek zorunda.
+İki nokta arası süreyi ölçer. İsimler aynı olmalıdır. Farklı isim eşleşmez, süre yazılmaz.
 
 ```js
-console.time("filtre")
+console.time("ciftler")
 const cift = Array.from({ length: 100000 }, (_, i) => i).filter((n) => n % 2 === 0)
-console.timeEnd("filtre")
+console.timeEnd("ciftler")
+console.log(cift.length)
 ```
 
-`cift`’i kullanmasan da olur; ölçtüğün şey filtrenin kendisi. Derleyici bazı boş işleri atlayabilir. Ölçümü ciddiye alacaksan sonucu bir değişkende tut, bir kez de `cift.length` oku.
+Konsolda milisaniye cinsinden bir süre ve `50000` görünür. Süre makineye göre değişir. `cift.length` okunur ki araç, kullanılmayan listeyi atlamasın.
 
-## count
+## count, group, clear, trace
 
-Aynı etiketin kaç kez geçtiğini sayar.
+`count` aynı etiketin kaç kez geçtiğini sayar. `countReset` sayacı sıfırlar.
 
 ```js
-;["ayva", "armut", "ayva"].forEach((meyve) => {
-  console.count(meyve)
+;["İzmir", "Van", "İzmir"].forEach((sehir) => {
+  console.count(sehir)
 })
-console.countReset("ayva")
 ```
 
-## group
+```text
+İzmir: 1
+Van: 1
+İzmir: 2
+```
 
-İlgili satırları iç içe katlar. Açılır kapanır. Karışık logda hayat kurtarır.
+`group` ilgili satırları katlar. Konsolda açılır kapanır bir başlık olur.
 
 ```js
 console.group("sipariş 19")
-console.log("çay")
-console.log("simit")
+console.log("Serhat")
+console.log("Van")
 console.groupEnd()
 ```
 
-`groupCollapsed` kapalı başlar.
+`console.clear()` ekranı süpürür. Deneme sırasında olur. Bitmiş kodda bırakılmaz.
 
-## clear ve trace
-
-`console.clear` ekranı süpürür. Deneme sırasında kullanılabilir; bitmiş uygulamada bırakılmaz.
-
-`console.trace` o satıra gelene kadar çağrı zincirini basar. Fonksiyonun nereden çağrıldığını `error` kadar gürültülü olmadan gösterir.
+`console.trace()` o satıra gelene kadar kim kimi çağırdı, zinciri basar. “Bu fonksiyon nereden geldi” sorusu içindir. `error` kadar gürültülü değildir.
 
 ## Egzersizler
 
-1. Bir uyarı ve bir hata bas. Konsolda renklerine bak.
-2. Üç nesnelik bir diziyi `console.table` ile yazdır. Sonra yalnız bir sütunu göster.
-3. `console.assert` ile bir dizinin boş olmadığını iddia et. Boş dizi ver, mesajı gör. Dolu dizi ver, sustuğunu gör.
-4. 100 bin elemanlı bir dizide `map` süresini `time` / `timeEnd` ile ölç.
-5. Bir döngüde iki farklı etiketi `count` ile say.
-6. `group` içinde üç satır bas, grubu kapat.
-7. Küçük bir fonksiyonu başka bir fonksiyondan çağır, içerde `console.trace` koy. Zinciri oku.
+1. Bir `warn` ve bir `error` bas. Konsolda renklerine bak. İkisini de `log` ile bastığında rengin kaybolduğunu gör.
+2. Üç nesnelik bir listeyi `console.table` ile yazdır. Alanlar `sehir` ve `yil` olsun. Şehirler İzmir, Van, Trabzon. Sonra yalnız `sehir` sütununu göster.
+3. `console.assert` ile bir listenin boş olmadığını iddia et. Boş liste ver, iletiyi gör. Dolu liste ver, sustuğunu gör.
+4. 100 bin öğelik bir listede `map` süresini `time` / `timeEnd` ile ölç. Aynı ölçümü bir de `for` döngüsüyle yap. Hangisi daha uzun sürdü, not et. Fark küçük olabilir.
+5. `["Van", "İzmir", "Van"]` üzerinde `count` kullan. Van 2, İzmir 1 olsun.
+6. `group` içinde üç satır bas: `Serhat`, `İstanbul`, `2026`. Grubu `groupEnd` ile kapat. Kapatmayı unutursan sonraki loglar da grubun içinde kalır.
+7. `dis()` adlı bir fonksiyon `ic()` çağırsın. `ic` içinde `console.trace` olsun. Zincirde `ic` ve `dis` görünsün.
 
 ---
 

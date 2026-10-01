@@ -1,52 +1,74 @@
 # 27. Gün — Portfolyo
 
-Tek sayfalık bir vitrin kurulur. Fotoğraf zorunlu değildir. Ad, bir cümle, üç proje kartı ve kartlar arasında gezen bir şerit yeter. Amaç gösterişli bir özgeçmiş değildir; veri dizisinden arayüz kurmak ve durumu bir değişkende tutmaktır.
+Tek sayfalık bir vitrin kurulur. Fotoğraf zorunlu değildir. Ad, bir cümle, proje kartları ve kartlar arasında gezen bir şerit yeter. Amaç gösterişli bir özgeçmiş değildir. Veri dizisinden arayüz kurmak ve o anki kartı tek bir sayıda tutmaktır.
 
 ## İçerik
 
-Metinler JavaScript’te dursun.
+Metinler JavaScript’te durur. HTML’e üç kart elle yazılmaz.
 
 ```js
 const profil = {
   ad: "Serhat",
-  satir: "Arayüz kurmayı ve veriyi ekranda göstermeyi çalışıyor.",
+  satir: "İzmir, Van, İstanbul ve Trabzon arasında arayüz çalışıyor.",
 }
 
 const projeler = [
   { ad: "Gezegen tartısı", ozet: "Kütleyi başka çekimde göstermek.", yil: 2026 },
-  { ad: "Ülke çubukları", ozet: "İki listeyi orantılı çubuk yapmak.", yil: 2026 },
+  { ad: "Çubuklar", ozet: "İki listeyi orantılı çubuk yapmak.", yil: 2026 },
   { ad: "Ülke kartları", ozet: "Arama ve bölgeyle süzmek.", yil: 2026 },
 ]
 ```
 
-Örnek ad Serhat’tır. Cümle değiştirilebilir. Projeler önceki günlerin işi olsun.
+Cümle değiştirilebilir. Kart sayısı dizinin boyu kadardır. Dördüncü nesne eklenince dördüncü nokta da kendiliğinden gelir.
 
-## Sayfa
+## Durum
 
-Üstte ad ve cümle. Altta bir şerit: aynı anda bir proje görünsün. Sağda ve solda düğme, altta kaçıncı kartta olduğunu söyleyen noktalar.
+Ekranda aynı anda bir proje görünsün. Sağda ve solda düğme, altta kaçıncı kartta olunduğunu söyleyen noktalar olsun.
 
-Durum tek sayı: `sira`. Düğme onu artırır veya azaltır. Sona gelince başa, baştayken geri gidince sona sar. Noktaya basınca `sira` o indekse zıplasın.
+Durum tek sayıdır: `sira`. Düğme onu artırır veya azaltır. Sona gelince başa, baştayken geri gidince sona sar. Noktaya basınca `sira` o indekse zıplar.
+
+Sarmanın küçük bir hali:
+
+```js
+function sonraki(sira, boy) {
+  return (sira + 1) % boy
+}
+
+function onceki(sira, boy) {
+  return (sira - 1 + boy) % boy
+}
+
+console.log(sonraki(2, 3))
+console.log(onceki(0, 3))
+```
+
+```text
+0
+2
+```
+
+Üç kartta son sıra `2`dir. Sonraki, `0`a döner. Baştayken önceki, `2`ye döner. `%` bölümden kalandır. Negatif kalanda `+ boy` düzeltir. Bu iki fonksiyon DOM görmez. Önce konsolda doğrula, sonra düğmeye bağla.
 
 Kart her seferinde baştan basılabilir. Üç kart yan yana dizilip kap `translateX` ile de kaydırılabilir. İkinci yol daha çok CSS ister. İkisi de geçerlidir. Durum tek sayıda duracağı için ilk yol daha sadedir.
 
-Noktalar `projeler.length` kadar üretilsin. Seçili olana sınıf ekle.
+Noktalar `projeler.length` kadar üretilir. `sira` ile aynı indeksteki noktaya seçili sınıfı konur, ötekinden çıkar.
 
-## Klavye
+## Klavye ve hareket
 
-Sol ve sağ ok, düğmeyle aynı işi yapsın. Odak bir `input` içindeyse karışma. `aria-label` ver ki düğmeler “önceki” ve “sonraki” desin, yalnız ikon olmasın.
+Sol ve sağ ok, düğmeyle aynı işi yapar. Odak bir `input` içindeyse karışmaz. 23. gündeki erken çıkış burada da durur. Düğmelere `aria-label` ver: “önceki” ve “sonraki”. Yalnız ok işareti ekran okuyucuya yetmez.
+
+İstenirse şerit beş saniyede bir `setInterval` ile ilerler. `document.hidden` ise tur atlanır. Sayfa arkadaysa dönmesin. Fare kartın üstündeyken de durur. `mouseenter` aralığı keser, `mouseleave` yeniden kurar. İki kez başlatma iki zamanlayıcı bindirmez. Kimliği bir değişkende tut, kurmadan önce eskisini `clearInterval` ile temizle.
 
 ## Görünüm
 
-Geniş bir kart, bol boşluk, tek vurgu rengi. Yazı kutusu 65 karakteri geçmesin, satır uzamasın. Telefon genişliğinde düğmeler alta insin, yan yana sıkışmasın.
+Geniş bir kart, bol boşluk, tek vurgu rengi. Satır `65ch` civarını geçmesin. `ch`, yaklaşık bir karakter genişliğidir. Telefon genişliğinde düğmeler alta insin.
 
-İstersen şerit beş saniyede bir `setInterval` ile ilerlesin. Sayfa görünmüyorken dönmesin: `document.hidden` ise tur atla. Fare kartın üstündeyken de durdur, okuma bölünmesin.
+## Bitti sayılması için
 
-## Bitti saymam için
-
-- Veriyi değiştirince kart sayısı ve noktalar kendiliğinden uyuyor
-- Başta geri, sonda ileri sarma çalışıyor
-- Seçili nokta görsel olarak ayrılıyor
-- `sira` hiçbir zaman dizinin dışına taşmıyor; hesap bir fonksiyonda, `goster(sira)` yalnız çiziyor
+- Dizideki kart sayısı ile nokta sayısı aynı. Bir proje silinince ikisi birden azalır.
+- Sondayken ileri, baştayken geri sarar. `sonraki` ve `onceki` konsolda doğrulanmıştır.
+- Seçili nokta renk ile ayrılır.
+- `sira` listenin dışına çıkmaz. Hesap bir fonksiyonda, `goster(sira)` yalnız çizer.
 
 ---
 

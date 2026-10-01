@@ -1,106 +1,151 @@
 # 10. Gün — Set ve Map
 
-Dizi sıra tutar, tekrara izin verir. Bazen tekrar istemem. Bazen de anahtar her türden olsun isterim. İki yapı bunun için var: `Set` ve `Map`.
+Liste sıra tutar ve tekrara izin verir. `["Van", "Van"]` iki öğedir. Bazen tekrar istenmez. Bazen anahtar metin değildir. İki yapı bunun içindir: `Set` ve `Map`.
 
 ## Set
 
-Tekil değerlerin çantası. Sıra, ekleme sırasıdır. Aynı değeri ikinci kez koymaz.
+Tekil değerlerin çantasıdır. Aynı değer ikinci kez girmez. Ekleme sırası durur.
 
 ```js
-const gelenler = new Set()
-gelenler.add("İzmir")
-gelenler.add("Van")
-gelenler.add("İzmir")
-console.log(gelenler.size)
-console.log(gelenler.has("Van"))
-gelenler.delete("Van")
+const gelen = new Set()
+gelen.add("İzmir")
+gelen.add("Van")
+gelen.add("İzmir")
+console.log(gelen.size)
+console.log(gelen.has("Van"))
+gelen.delete("Van")
+console.log(gelen.has("Van"))
 ```
 
-Diziden tekilleştirmek en sık kullandığım hâl:
+```text
+2
+true
+false
+```
+
+`İzmir` iki kez eklendi, sayıda 1 sayılır. `size` uzunluk değil, öğe sayısıdır. Listede `length` vardı. Burada `size` vardır.
+
+Tekrarlı bir listeyi tekilleştirmek en sık iştir. Üç nokta, seti listeye geri açar.
 
 ```js
-const ham = ["a", "b", "a", "c"]
+const ham = ["Van", "İzmir", "Van", "Trabzon"]
 const tek = [...new Set(ham)]
 console.log(tek)
 ```
 
-Üç nokta, seti diziye açar. Yayma 11. günde yeniden ele alınır.
+```text
+["Van", "İzmir", "Trabzon"]
+```
 
-Döngü `for...of` ile olur. İndeks yoktur.
+`for...of` ile dolaşılır. Sıra numarası yoktur.
 
 ```js
-for (const kisi of gelenler) {
-  console.log(kisi)
+for (const sehir of gelen) {
+  console.log(sehir)
 }
 ```
 
-`clear` hepsini siler.
+`clear()` hepsini siler.
 
-Eşitlik `===` gibidir. Nesneler içeriği aynı olsa bile ayrı referanssa sete ikisi de girer. İçerik karşılaştırması yapmaz.
+Eşitlik `===` gibidir. İki ayrı nesne içeriği aynı olsa bile iki öğe sayılır. Set, alanları kıyaslamaz. Referansa bakar.
 
-## İki set arasında
-
-Dilin hazır bir birleşim metodu yoktur; işlem ayrıca yazılır.
+İki set arasında hazır birleşim metodu yoktur. Listeye açıp `filter` ile yazılır.
 
 ```js
 const a = new Set([1, 2, 3])
 const b = new Set([3, 4])
-
 const birlesim = new Set([...a, ...b])
 const kesisim = new Set([...a].filter((n) => b.has(n)))
 const fark = new Set([...a].filter((n) => !b.has(n)))
+console.log([...birlesim])
+console.log([...kesisim])
+console.log([...fark])
 ```
+
+```text
+[1, 2, 3, 4]
+[3]
+[1, 2]
+```
+
+Kesişim ikisinde de bulunanlardır. Fark, `a`da olup `b`de olmayandır.
 
 ## Map
 
-Anahtar ve değer. Nesneden farkı: anahtar yalnızca metin veya sembol olmak zorunda değil. Sayı, nesne, hatta başka bir map olabilir. Ayrıca ekleme sırasını tutar. Boyutu `.size` ile net gelir.
+Anahtar ve değer. Nesneden farkı şunlardır: anahtar metin olmak zorunda değildir, ekleme sırası durur, öğe sayısı `.size` ile okunur.
 
 ```js
-const fiyat = new Map()
-fiyat.set("un", 40)
-fiyat.set("yağ", 90)
-console.log(fiyat.get("un"))
-console.log(fiyat.has("tuz"))
-fiyat.delete("yağ")
-console.log(fiyat.size)
+const nufus = new Map()
+nufus.set("İzmir", 4)
+nufus.set("Van", 1)
+console.log(nufus.get("İzmir"))
+console.log(nufus.has("Trabzon"))
+nufus.delete("Van")
+console.log(nufus.size)
 ```
 
-Kurarken çiftler verebilirsin:
+```text
+4
+false
+1
+```
+
+`get` yoksa `undefined` döner, hata vermez. `set` aynı anahtara yeniden yazılırsa eski değer gider.
+
+Kurarken çiftler verilebilir:
 
 ```js
-const gunKisaltma = new Map([
-  ["pt", "pazartesi"],
-  ["sa", "salı"],
+const kisa = new Map([
+  ["iz", "İzmir"],
+  ["vn", "Van"],
 ])
-```
 
-Gezmek:
-
-```js
-for (const [kisa, uzun] of gunKisaltma) {
-  console.log(kisa, uzun)
+for (const [kod, ad] of kisa) {
+  console.log(kod + " -> " + ad)
 }
 ```
 
-`keys`, `values`, `entries` de var.
+```text
+iz -> İzmir
+vn -> Van
+```
 
-## Hangisini seçerim
+`keys`, `values` ve `entries` de vardır. Döngüdeki `[kod, ad]` çifti 11. gündeki parçalamadır.
 
-- Sıralı liste, tekrar olabilir: dizi.
-- Aynı kayıttan bir tane: set.
-- Anahtar metinse ve biçim sabitse: nesne.
-- Anahtar sayı ya da nesneyse, ya da sık ekleme ve silme varsa: map.
+Anahtar nesne de olabilir. `get` aynı nesneyi ister. Aynı görünen yeni bir süslü parantez başka referanstır, bulunamaz.
 
-Nesne, çoğu iş için map yerine yeter. Map, anahtar metin olmadığında veya dışarıdan gelen anahtarlar prototiple karışmasın istendiğinde seçilir.
+```js
+const defter = { ad: "Serhat" }
+const notlar = new Map()
+notlar.set(defter, "İstanbul")
+console.log(notlar.get(defter))
+console.log(notlar.get({ ad: "Serhat" }))
+```
+
+```text
+İstanbul
+undefined
+```
+
+## Hangisi seçilir
+
+| İhtiyaç | Yapı |
+| --- | --- |
+| Sıra önemli, tekrar olabilir | liste |
+| Aynı değerden bir tane | set |
+| Anahtar metin, biçim sabit | nesne |
+| Anahtar sayı ya da nesne, sık ekle-sil | map |
+
+Nesne çoğu kayıt için yeter. Map, anahtar metin olmadığında ya da dışarıdan gelen anahtarlarla karışılmasın istendiğinde seçilir.
 
 ## Egzersizler
 
-1. Tekrarlı bir isim dizisini sete çevir, boyutunu yazdır.
-2. İki sayı kümesinin kesişimini ve farkını üret.
-3. Bir `Map` kur: ürün adı → stok adedi. Bir ürün ekle, birini sil, birini sorgula.
-4. Map’i `for...of` ile dolaş, anahtar ve değeri yazdır.
-5. Anahtarı nesne olan bir map dene: bir kitap nesnesini anahtar, ödünç alan kişiyi değer yap. `get` ile aynı nesne referansını kullanırsan değeri bulursun; yeni bir `{...}` ile bulamazsın. Bunu gözünle gör.
-6. Bir metindeki kelimeleri say. `split` ve `Map` kullan. Her kelimeyi görünce değerini bir artır.
+1. `["Van", "Van", "İzmir", "Trabzon", "İzmir"]` listesini sete çevir. `size` 3 olmalıdır. Listeye geri aç, tekrarları gör.
+2. `new Set(["İzmir", "Van"])` ve `new Set(["Van", "Trabzon"])` için kesişimi ve farkı yazdır. Kesişim yalnız `Van` olmalıdır.
+3. Şehirden nüfusa giden bir `Map` kur. İzmir, Van, İstanbul, Trabzon. Birini sil, birini `get` ile sor, olmayan bir anahtar için `undefined` gör.
+4. Map’i `for...of` ile dolaş. Her satır `Van: 1` biçiminde olsun.
+5. Bir nesneyi anahtar yap, değeri `"Serhat"` olsun. Aynı nesneyle `get` çalışsın. Yeni `{ }` ile `get` `undefined` versin. Nedenini bir cümle yaz.
+6. `"van izmir van trabzon izmir"` metnini boşluktan böl. Her şehrin kaç kez geçtiğini `Map` ile say. `van` iki, `izmir` iki, `trabzon` bir çıkmalı. Görmeyince değere 0 say, sonra 1 ekle.
 
 ---
 

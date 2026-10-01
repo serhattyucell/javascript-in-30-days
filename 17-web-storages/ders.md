@@ -1,64 +1,84 @@
 # 17. Gün — Web depoları
 
-Çerezden ayrı, tarayıcının verdiği iki çekmece vardır. İkisi de metin tutar, ikisi de siteye özeldir. Fark, ömürlerindedir.
+Sayfa yenilenince JavaScript’teki değişkenler silinir. Tarayıcı, siteye özel iki çekmece verir. İkisi de yalnızca metin tutar. Çerez değildir. Sunucuya her istekte gitmez.
 
-- `sessionStorage` sekme kapanınca silinir. Aynı sekmede yenilemeye dayanır.
-- `localStorage` sen silene kadar durur. Başka sekme, yarın, haftaya.
+| Çekmece | Ömrü |
+| --- | --- |
+| `sessionStorage` | Sekme kapanınca silinir. Yenilemeye dayanır. |
+| `localStorage` | Sen silene kadar durur. Yarın da, başka sekmede de durur. |
 
-Node’da bu ikisi yoktur. Denemeyi tarayıcıda yap. Kota dolunca yazma `QuotaExceededError` fırlatabilir. Onu 14. gündeki gibi yakala.
+Node’da bu ikisi yoktur. Deneme tarayıcıda, bir `index.html` açarak yapılır. Kota dolunca yazma hata fırlatabilir. 14. gündeki gibi yakalanır.
 
 ## Yazmak ve okumak
 
-Arayüz ikisinde de aynı: `setItem`, `getItem`, `removeItem`, `clear`, `key`, `length`.
+Arayüz ikisinde de aynıdır: `setItem`, `getItem`, `removeItem`, `clear`.
 
 ```js
-localStorage.setItem("mutfak", "açık")
-console.log(localStorage.getItem("mutfak"))
-localStorage.removeItem("mutfak")
+localStorage.setItem("sehir", "İzmir")
+console.log(localStorage.getItem("sehir"))
 ```
 
-Olmayan anahtar `null` döner, `undefined` değil. Koşulda ikisi de boş sayılır ama `===` ile bakacaksan `null` bekle.
+```text
+İzmir
+```
 
-Değer her zaman metindir. Sayı yazsan bile okuyunca metin gelir.
+Sayfayı yenile, aynı satırı yalnız `getItem` ile tekrar çalıştır. `İzmir` hâlâ oradadır. Değişken olsaydı kaybolurdu.
+
+Olmayan anahtar `null` döner, `undefined` değil.
+
+```js
+console.log(localStorage.getItem("yok"))
+```
+
+```text
+null
+```
+
+Değer her zaman metindir. Sayı yazılsa bile okuyunca metin gelir.
 
 ```js
 localStorage.setItem("adet", 3)
 console.log(typeof localStorage.getItem("adet"))
 ```
 
-Nesne ve dizi için dünkü JSON:
+```text
+string
+```
+
+Toplamadan önce `Number(...)` gerekir. `"3" + 1` sonucu `"31"` olur. `Number("3") + 1` sonucu `4` olur.
+
+Nesne ve liste için 16. günün `JSON.stringify` ve `JSON.parse` çifti kullanılır.
 
 ```js
-const sepet = [
-  { ad: "un", adet: 1 },
-  { ad: "tuz", adet: 2 },
+const rota = [
+  { sehir: "İzmir", gun: 1 },
+  { sehir: "Van", gun: 2 },
 ]
-localStorage.setItem("sepet", JSON.stringify(sepet))
+localStorage.setItem("rota", JSON.stringify(rota))
 
-const gelen = JSON.parse(localStorage.getItem("sepet") || "[]")
-console.log(gelen[0].ad)
+const gelen = JSON.parse(localStorage.getItem("rota") || "[]")
+console.log(gelen[0].sehir)
 ```
 
-`|| "[]"` koydum çünkü ilk açılışta anahtar yoktur, `parse(null)` patlamaz aslında, `null` metni bozuk sayılmaz ve `null` döner. Sonra `[0]` okursan patlar. Bu yüzden varsayılanı kendim koyarım.
+```text
+İzmir
+```
 
-## Temizlemek
+`|| "[]"` ilk açılış içindir. Anahtar yoksa `getItem` `null` döner. `parse` onu nesne yapmaz, sonra `[0]` okumak patlar. Varsayılan boş liste olarak verilir.
+
+Bozuk metin `parse`i kırar. `try/catch` ile yakala, o anahtarı `removeItem` ile sil.
+
+## Silmek
 
 ```js
-localStorage.removeItem("sepet")
-sessionStorage.clear()
+localStorage.removeItem("rota")
 ```
 
-`clear`, o kaynaktaki her şeyi siler. Başka bir kaydı da götürebilir. Anahtarlar `not.` gibi bir ön ekle yazılır; silerken hepsi körlemesine `clear` edilmez.
+`clear()` o sitedeki **her** anahtarı siler. Başka bir sayfanın anahtarını da götürür. Anahtarlar `rota.` gibi bir ön ekle yazılır. Silinecekse tek tek `removeItem` çağrılır.
 
-## Hangisini seçerim
+Sekme kapanınca gitmesi gereken taslak `sessionStorage`a konur. Tema, dil, sepet, “adı hatırla” `localStorage`da kalır. Şifre, jeton ve kart numarası ikisine de konmaz. Sayfadaki her kod okuyabilir. Bunlar gizli kasa değildir.
 
-Sekme içi sihirbaz, adım adım form, “bu sayfa yenilensin ama tarayıcı kapanınca unutulsun”: oturum deposu.
-
-Tema, dil, sepet, “beni hatırla”, taslak not: yerel depo.
-
-İkisi de gizli kasa değil. Sayfadaki her kod okur. Şifre, jeton, kart numarası koyma. Onlar için çerez ve sunucu tarafı var; o bu otuz günün dışı.
-
-Sekmeler arası haber için `window` üstünde `storage` olayı var. Başka sekme `localStorage` değiştirince bu sekme duyar. Aynı sekmede duymaz.
+Başka sekme `localStorage` değiştirince bu sekme `storage` olayını duyar. Aynı sekmede duymaz.
 
 ```js
 window.addEventListener("storage", (olay) => {
@@ -66,14 +86,16 @@ window.addEventListener("storage", (olay) => {
 })
 ```
 
+Bunu görmek için aynı adresi iki sekmede aç. Birinde `setItem` çağır. Öteki sekmenin konsoluna bak.
+
 ## Egzersizler
 
-1. Adını `localStorage`’a yaz, sayfayı yenile, hâlâ durduğunu gör. Sonra sil.
-2. Aynı anahtarı `sessionStorage`’a yaz. Sekmeyi kapatıp yeni sekmede aç, gittiğini gör.
-3. Bir görev listesini dizi olarak sakla. Sayfa açılınca oku, yoksa boş dizi kabul et.
-4. Sayı sakla, okuyunca `Number` ile çevir, toplama yap. Çevirmeden `+` yaparsan bitiştiğini gör.
-5. Bozuk bir JSON’u depoya elle yaz, `parse` ederken hatayı yakala, depoyu o anahtardan temizle.
-6. İki anahtar koy, `clear` yerine yalnız birini `removeItem` ile sil, ötekinin durduğunu kontrol et.
+1. `localStorage.setItem("ad", "Serhat")` yaz. Sayfayı yenile. Yalnız `getItem` ile oku. `Serhat` duruyorsa çekmece çalışıyordur. Sonra `removeItem` ile sil, `null` gör.
+2. Aynı anahtarı `sessionStorage`a yaz. Sekmeyi kapat, yeni sekmede aç, `getItem` `null` olsun.
+3. `["İzmir", "Van", "Trabzon"]` listesini `rota` anahtarıyla sakla. Sayfa açılınca oku. Anahtar yoksa boş liste kabul et.
+4. `setItem("adet", 4)` yaz. Okuyunca `Number` ile çevir, 10 ekle. Sonuç `14` olsun. Çevirmeden topla, `410` veya `"410"` gör. Farkı not et.
+5. `localStorage.setItem("bozuk", "{ad:")` yaz. `parse` ederken hatayı yakala, anahtarı sil.
+6. `ad` ve `sehir` diye iki anahtar koy. Yalnız `sehir`i sil. `ad`ın durduğunu kontrol et. `clear` çağırma.
 
 ---
 

@@ -1,10 +1,8 @@
 # 26. Gün — Ülke kartları
 
-Önceki günde çubuk vardı. Bu bölümde kart ızgarası kurulur. Arama kutusu 23. gündeki süzgecin devamıdır. Veri önce sayfanın içinde durur. İstenirse [restcountries](https://restcountries.com) gibi bir adresten `fetch` ile de çekilebilir. Önce yerel dizi bitirilir. Ağ, sonraki adımdır.
+25. günde çubuk vardı. Bu gün kart ızgarası kurulur. Arama kutusu 23. gündeki süzgecin devamıdır. Veri önce sayfanın içindedir. Ağ, yerel hali bittikten sonra eklenir.
 
-## Veri
-
-Her kayıtta en az ad, başkent, bölge ve nüfus olsun. On-on iki ülke yeter. Gerçek sayıları kabaca yazman sorun değil; ders kartın kendisi.
+Her kayıtta ad, başkent, bölge ve nüfus olsun. Aynı bölgeden en az iki ülke olsun. Yoksa bölge süzgeci bir işe yaramaz.
 
 ```js
 const ulkeler = [
@@ -17,37 +15,68 @@ const ulkeler = [
 ]
 ```
 
-Listeyi sen büyüt. Aynı bölgeden en az iki ülke olsun ki süzgeç bir işe yarasın.
+Başkentler gerçek ülke verisidir. Örnek kişide kullanılan şehirler burada değiştirilmez. Ankara Türkiye’nin başkentidir.
 
 ## Kart
 
-Izgara `repeat(auto-fill, minmax(14rem, 1fr))` ile kurulsun. Kartta ülke adı başlık, altta başkent, bölge ve nüfus. Nüfus `Intl.NumberFormat` ile.
+Izgara şöyle kurulur:
+
+```css
+.izgara {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 1rem;
+}
+```
+
+Kartta ülke adı başlık olsun. Altta başkent, bölge ve nüfus. Nüfus `Intl.NumberFormat("tr-TR")` ile görünsün. `85000000` yerine `85.000.000` okunur.
 
 ## Süzgeç
 
-Üstte bir arama kutusu ve bölge için düğmeler: hepsi, Asya, Afrika, Avrupa, Amerika. İkisi birlikte çalışsın. Sonuç, adı aramaya uyan **ve** bölgesi seçili olan ülkeler.
+Üstte bir arama kutusu. Bölgeler için düğmeler: hepsi, bir de veriden çıkan bölgeler. İkisi birlikte çalışır. Sonuç, adı aramaya uyan **ve** bölgesi seçili olan ülkelerdir.
 
-Aramayı `input` olayına bağla. Her seferinde eski kartları kaldır, yenilerini bas. Eşleşme yoksa ızgaranın yerine tek cümle: “bu süzgeçte ülke yok”.
+Aramayı `input` olayına bağla. Her seferinde eski kartları `replaceChildren` ile kaldır, yenilerini bas. Eşleşme yoksa ızgaranın yerine tek cümle: “bu süzgeçte ülke yok”.
 
-Bölge listesini elde yazma. `ulkeler` içinden `Set` ile tekil bölgeleri çıkar, düğmeleri ondan üret. Yeni bölge eklenince düğme kendiliğinden gelsin.
+Bölge düğmelerini elle yazma. `ulkeler` içinden `Set` ile tekil bölgeleri çıkar, düğmeleri ondan üret. Yeni bir bölge eklenince düğme kendiliğinden gelsin. 10. gündeki set tam bu iş içindir.
 
-## İsteğe bağlı ağ
+Süzgeç DOM görmesin. Dizi girer, dizi çıkar.
 
-Yerel hali bittikten sonra `fetch("https://restcountries.com/v3.1/all?fields=name,capital,region,population")` denenebilir. Gelen biçim yerel diziden farklıdır. Bir `map` ile dersin kullandığı biçime çevrilir:
+```js
+function suz(liste, { aranan, bolge }) {
+  const igne = aranan.toLocaleLowerCase("tr-TR")
+  return liste.filter((ulke) => {
+    const adTutar = ulke.ad.toLocaleLowerCase("tr-TR").includes(igne)
+    const bolgeTutar = bolge === "hepsi" || ulke.bolge === bolge
+    return adTutar && bolgeTutar
+  })
+}
+```
 
-- `name.common` → `ad`
-- `capital?.[0]` → `baskent`
-- `region` → `bolge`
-- `population` → `nufus`
+`suz(ulkeler, { aranan: "a", bolge: "Afrika" })` konsolda Kenya ve Mısır benzeri, adında a geçen Afrika ülkelerini vermelidir. Sayfaya bağlamadan önce bunu çalıştır. Fonksiyon doğruysa kartı çizmek ayrı ve kısa kalır.
 
-İstek sürerken “yükleniyor” yaz. `try/catch` ile ağ hatasında o yazıyı “veri gelmedi” yap, sayfa beyaz kalmasın. `yanit.ok` kontrolünü unutma.
+## Ağ, isteğe bağlı
 
-## Bitti saymam için
+Yerel hali bitince şu adres denenebilir:
 
-- Arama ve bölge aynı anda süzüyor
-- Kart sayısı, süzgeç tutunca değişiyor
-- Boş sonuçta ızgara dağılmıyor, bir mesaj duruyor
-- Veri fonksiyonu var: `suz(ulkeler, { aranan, bolge })`. DOM’a dokunmuyor, dizi döndürüyor
+```js
+fetch("https://restcountries.com/v3.1/all?fields=name,capital,region,population")
+```
+
+Gelen biçim yerel diziden farklıdır. Bir `map` ile dersin biçimine çevrilir:
+
+- `name.common` adı olur
+- `capital?.[0]` başkent olur. Köşeli parantezdeki `?` başkent yoksa patlamasın diyedir
+- `region` bölge olur
+- `population` nüfus olur
+
+İstek sürerken “yükleniyor” yaz. `try/catch` ve `yanit.ok` olsun. Ağ yoksa “veri gelmedi” yaz, sayfa beyaz kalmasın.
+
+## Bitti sayılması için
+
+- Arama ve bölge aynı anda süzüyor. `af` yazıp Afrika seçince her iki koşul da tutan kartlar kalır.
+- Kart sayısı, süzgeç tutunca değişir.
+- Boş sonuçta ızgara dağılmaz, bir mesaj durur.
+- `suz` DOM’a dokunmaz. Çizmek başka fonksiyondadır.
 
 ---
 

@@ -1,40 +1,43 @@
 # 8. Gün — Kapsam ve nesneler
 
-Bu bölümde iki konu yan yanadır. İlki bir adın nerede göründüğüdür: kapsam. İkincisi bir kaydı tek yerde tutmaktır: nesne.
+İki konu vardır. Birincisi bir adın hangi satırlardan görüldüğüdür. Buna kapsam denir. İkincisi bir kaydı tek yerde tutmaktır. Buna nesne denir.
 
 ## Kapsam
 
-Kapsam, bir adın hangi satırlardan görülebildiğidir.
+Kapsam, bir adın hangi satırlardan okunabildiğidir.
 
-**Küresel.** Dosyanın en dışında tanımlanan ad her yerden görülür. Tarayıcıda `var` ve fonksiyon bildirimi `window` üstüne de düşer. `let` ve `const` düşmez. Küresel alana çok ad koymak çarpışma yaratır.
+**Küresel.** Dosyanın en dışında tanımlanan ad her yerden görülür. Çok ad oraya saçılırsa isimler çarpışır. `var` ve klasik `function` tarayıcıda `window`un üzerine de düşer. `let` ve `const` düşmez. Yeni kodda küresel alana az şey konur.
 
-**Fonksiyonun içi.** `let` veya `const` ile içeride tanımlanan isim dışarı sızmaz.
+**Fonksiyonun içi.** İçerideki `let` ve `const` dışarı sızmaz.
 
 ```js
-function mutfak() {
-  const bardak = 4
-  console.log(bardak)
+function gizliKutu() {
+  const sehir = "Van"
+  console.log(sehir)
 }
-mutfak()
+
+gizliKutu()
+console.log(sehir)
 ```
 
-Dışarıda `bardak` yoktur. Konsol `ReferenceError` basar.
+İlk satır `Van` basar. İkinci satır hata verir: `sehir` dışarıda yoktur. Konsol `ReferenceError` der.
 
-**Blok.** `if` ve `for` süslü parantezi de `let`/`const` için duvardır.
+**Blok.** `if` ve `for` süslü parantezi de `let` ve `const` için duvardır.
 
 ```js
 if (true) {
   const gizli = 1
 }
+console.log(gizli)
 ```
 
-`var` bu duvarı tanımaz. `if` içinde yazılan `var`, fonksiyon boyu görünür. Yeni kodda `var` kullanılmaz.
+Bu da `ReferenceError` verir. Aynı yerde `var` yazılsaydı blok duvarı delinirdi ve dışarıdan okunurdu. Yeni kodda `var` kullanılmaz.
 
-İç kapsam dıştakini okur. Dış, içtekini okuyamaz. Aynı isim içeride yeniden tanımlanırsa içteki, dıştakini o blok boyunca gölgeler.
+İç taraf dıştakini okur. Dış taraf içtekini okuyamaz. Aynı ad içeride yeniden tanımlanırsa, o blokta içteki ad dıştakini gölgeler.
 
 ## Nesne
 
-Nesne, isimlendirilmiş alanların çantasıdır. Anahtar ve değer. Süslü parantez.
+Nesne, adı olan alanların paketidir. Anahtar ve değer. Süslü parantez. Liste sıra tutar. Nesne “bu kaydın şehri Van” demek içindir.
 
 ```js
 const kayit = {
@@ -42,105 +45,132 @@ const kayit = {
   sehir: "Van",
   aktif: true,
 }
+
+console.log(kayit.ad)
+console.log(kayit["sehir"])
 ```
 
-Boş başlayıp alan eklenebilir:
-
-```js
-const dolap = {}
-dolap.raf = 2
-dolap["cekmece"] = 1
+```text
+Serhat
+Van
 ```
 
-Nokta, anahtar düzgün bir isimse yeter. Değişkenden gelen veya boşluklu anahtarda köşeli parantez şart.
+Nokta, anahtar düzgün bir adsa yeter. Anahtar bir değişkenden geliyorsa veya boşluk taşıyorsa köşeli parantez şarttır.
 
 ```js
 const alan = "sehir"
 console.log(kayit[alan])
-console.log(kayit.ad)
 ```
 
-Olmayan alan okunursa `undefined` gelir, program durmaz.
+```text
+Van
+```
 
-## Alanı güncellemek ve silmek
+`kayit.alan` bambaşka bir kapı arar. Adı gerçekten `alan` olan bir alan yoktur, sonuç `undefined` olur. Hata çıkmaz. Olmayan alan da `undefined` verir. Bu yüzden yazım hatası sessiz kalabilir.
+
+Boş başlayıp alan eklenebilir:
+
+```js
+const not = {}
+not.kisi = "Serhat"
+not["sehir"] = "İstanbul"
+console.log(not)
+```
+
+```text
+{ kisi: "Serhat", sehir: "İstanbul" }
+```
+
+## Güncellemek ve silmek
+
+`const kayit` yeniden atanamaz. `kayit.sehir = "Trabzon"` serbesttir. Paketin kimliği durur, içi değişir.
 
 ```js
 kayit.sehir = "Trabzon"
 kayit.yil = 2026
 delete kayit.aktif
+console.log(kayit)
 ```
 
-`const kayit` yeniden atanamaz. `kayit.sehir = "Trabzon"` serbesttir; nesnenin kimliği durur, içi değişir.
+```text
+{ ad: "Serhat", sehir: "Trabzon", yil: 2026 }
+```
+
+`delete` alanı kaldırır. `aktif` artık yoktur.
 
 ## Metod
 
-Fonksiyon da bir değerdir. Nesnenin içine konunca metoda dönüşür. Klasik fonksiyon yazılırsa `this`, o nesneyi gösterir.
+Fonksiyon da bir değerdir. Nesnenin içine konunca metod olur. Klasik fonksiyon yazılırsa `this`, o nesneyi gösterir.
 
 ```js
 const lamba = {
   acik: false,
+  sehir: "İzmir",
   ac() {
     this.acik = true
-    return this.acik
+    return this.sehir + " lambası açık"
   },
 }
 
 console.log(lamba.ac())
+console.log(lamba.acik)
 ```
 
-Ok fonksiyonunda `this` nesneyi otomatik göstermez. Nesne metodunda ok fonksiyonu kullanılmaz.
+```text
+İzmir lambası açık
+true
+```
+
+`this.acik`, lambanın kendi `acik` alanıdır. Ok fonksiyonunda `this` nesneyi otomatik göstermez. Nesne metodunda ok kullanılmaz.
 
 ## Hazır araçlar
 
 ```js
-const anahtarlar = Object.keys(kayit)
-const degerler = Object.values(kayit)
-const ciftler = Object.entries(kayit)
-console.log(anahtarlar)
+console.log(Object.keys(kayit))
+console.log(Object.values(kayit))
 console.log("ad" in kayit)
-console.log(kayit.hasOwnProperty("ad"))
 ```
 
-Kopyalamak için 11. günde yayma ele alınır. Bu bölümde sığ kopya:
+`Object.keys` alan adlarının listesini verir. `Object.values` değerlerin listesini verir. `Object.entries` ikisini çift çift verir. `"ad" in kayit` o kapı var mı diye bakar, `true` veya `false` döner.
 
-```js
-const yedek = Object.assign({}, kayit)
-```
-
-Bu kopya üst seviyededir. İçinde başka nesne varsa ikisi aynı iç nesneyi paylaşır.
-
-## Gezmek
+`for...in` de alan adı verir ama nesnenin kalıtımdan gelen adlarına da uğrayabilir. `Object.keys` yalnız kendininkilere bakar. Gezmek için o tercih edilir.
 
 ```js
 for (const anahtar of Object.keys(kayit)) {
-  console.log(anahtar, kayit[anahtar])
+  console.log(anahtar + ": " + kayit[anahtar])
 }
 ```
 
-`for...in` de anahtar verir ama prototipten gelenleri de dolaşabilir. `Object.keys` daha dar ve öngörülebilir olduğu için tercih edilir.
+Kopya bu gün sığdır. `Object.assign({}, kayit)` üst alanları yeni bir nesneye taşır. İçerde başka nesne varsa iki kopya aynı iç nesneyi paylaşır. Yayma ile kopya 11. gündedir.
 
-## Dizi ile nesne
+## Liste mi, nesne mi
 
-Sıra önemliyse ve öğeler aynı türdense dizi kullanılır. Bir kaydın özellikleri varsa nesne kullanılır. “Üçüncü öğe” diziye, “bu kaydın şehri” nesneye gider. İkisi birlikte de durur: nesnelerin dizisi. 9. günün `map` metodu bunu işler.
+“Üçüncü şehir” deniyorsa liste. “Serhat’ın şehri” deniyorsa nesne. İkisi birlikte durur: nesnelerin listesi. 9. günün `map`i tam bu listedir.
 
 ```js
-const menu = [
-  { ad: "çorba", fiyat: 80 },
-  { ad: "pilav", fiyat: 90 },
+const kisi = [
+  { ad: "Serhat", sehir: "İzmir" },
+  { ad: "Serhat", sehir: "Trabzon" },
 ]
-console.log(menu[1].fiyat)
+console.log(kisi[1].sehir)
 ```
+
+```text
+Trabzon
+```
+
+İkinci kayıt `kisi[1]`dir. Onun `sehir` alanı nokta ile okunur.
 
 ## Egzersizler
 
-1. Bir fonksiyonun içinde `const` tanımlayın, dışarıdan okumayı deneyin, hatayı okuyun.
-2. Bir `if` bloğunda `let` tanımlayın, blok dışında okumayı deneyin. Aynı deneyi `var` ile yapın, farkı yazın.
-3. Bir kişi nesnesi kurun: `ad` alanı `Serhat`, `sehir` alanı `İzmir` olsun. Bir alanı nokta ile, bir alanı köşeli parantezle okuyun.
-4. Nesneye yeni alan ekleyin, bir alanı `delete` ile silin.
-5. `tanit` adlı bir metod ekleyin. `this.ad` ve `this.sehir` ile bir cümle döndürsün.
-6. `Object.keys` ve `Object.values` çıktısını yazdırın.
-7. Üç kayıttan oluşan bir dizi kurun. Her kayıtta şehir ve nüfus olsun. Şehirler İzmir, Van ve Trabzon olsun. İkinci kaydın nüfusunu yazdırın.
-8. `Object.assign` ile kopya alın, kopyanın adını değiştirin, aslının değişmediğini görün.
+1. Bir fonksiyonun içinde `const sehir = "Van"` tanımla. Fonksiyonun dışında `console.log(sehir)` dene. `ReferenceError` iletisini oku.
+2. Bir `if` bloğunda `let n = 1` tanımla, blok dışında okumayı dene. Aynı deneyi `var` ile yap. `var`ın blok dışından okunduğunu, `let`in okunmadığını gör.
+3. `ad: "Serhat"`, `sehir: "İzmir"` olan bir nesne kur. `ad`ı nokta ile, `sehir`i bir değişken ve köşeli parantez ile oku.
+4. Nesneye `yil: 2026` ekle. `sehir`i `delete` ile sil. Kalan nesneyi yazdır.
+5. `tanit` metodu ekle. `this.ad` ve `this.sehir` ile `Serhat, İzmir` cümlesi döndürsün. Konsola fonksiyon basmasın, `return` etsin.
+6. `Object.keys` ve `Object.values` çıktısını yazdır. Anahtar listesinde `ad` geçiyor mu, `"ad" in nesne` ile bak.
+7. Üç kayıtlık bir liste kur. Şehirler İzmir, Van ve Trabzon olsun. Her kayıtta `sehir` ve `nufus` olsun. İkinci kaydın nüfusunu yazdır.
+8. `Object.assign` ile kopya al. Kopyanın adını değiştir. Asıl nesnenin adının değişmediğini yazdırarak göster.
 
 ---
 

@@ -1,10 +1,8 @@
 # 25. Gün — Çubuk grafikler
 
-Bu bölümde iki liste çubuğa çevrilir. Veri aşağıdadır. Çubuğun uzunluğu en büyük değere göre oranlanır. Grafik kütüphanesi yoktur. Bir `div` kullanılır, genişliği yüzdedir.
+İki liste çubuğa çevrilir. Veri aşağıdadır. Çubuğun uzunluğu en büyük değere göre oranlanır. Grafik kütüphanesi yoktur. Bir `div` kullanılır, genişliği yüzdedir.
 
-## Veri
-
-Nüfus milyon cinsinden, yuvarlanmış. Dil, o dili konuşan ülke sayısı gibi düşünme; burada “konuşan nüfus, milyon” kaba bir ölçek. Amaç barların birbirine oranı.
+Sayılar milyon cinsindedir, yuvarlanmıştır. Amaç tam sayım değil, çubukların birbirine oranıdır.
 
 ```js
 const nufus = [
@@ -25,18 +23,37 @@ const diller = [
   { ad: "Çince", milyon: 1100 },
   { ad: "Hintçe", milyon: 600 },
   { ad: "İspanyolca", milyon: 560 },
-  { ad: "Fransızca", milyon: 310 },
   { ad: "Arapça", milyon: 274 },
-  { ad: "Bengalce", milyon: 273 },
   { ad: "Portekizce", milyon: 264 },
   { ad: "Rusça", milyon: 255 },
-  { ad: "Urduca", milyon: 232 },
+  { ad: "Türkçe", milyon: 88 },
 ]
 ```
 
-## Çubuk
+Türkçe satırı ölçeği görmek içindir. 88, 1500’ün yanında kısa bir çubuk olmalıdır. Kısa değilse oran yanlış hesaplanmıştır.
 
-En büyük değeri bul, `Math.max` veya `reduce`. Her satırın genişliği `(deger / enBuyuk) * 100` yüzde olsun. En büyük çubuk dolu görünür, ötekiler ona göre kısalır.
+## Oran
+
+En büyük değeri bul. `reduce` ile biriken en büyüğü tut veya `Math.max(...liste.map((x) => x.milyon))` kullan.
+
+Her satırın genişliği `(deger / enBuyuk) * 100` yüzdedir. En büyük çubuk `100%` olur. Ötekiler ona göre kısalır. Sıfır veya negatif değerde genişlik `0%` olsun. Eksi yüzde yazma.
+
+Küçük bir kontrol, sayfadan önce konsolda:
+
+```js
+const enBuyuk = 1500
+console.log((88 / enBuyuk) * 100)
+```
+
+```text
+5.8666...
+```
+
+Türkçe çubuğu yaklaşık yüzde 6 genişlik alır. İngilizce yüzde 100 alır.
+
+## Satır
+
+HTML’de boş bir `div id="grafik"` olsun. Satırı JavaScript üretsin.
 
 ```html
 <div class="satir">
@@ -46,12 +63,10 @@ En büyük değeri bul, `Math.max` veya `reduce`. Her satırın genişliği `(de
 </div>
 ```
 
-Satırı JavaScript üretsin. `.cubuk` için CSS:
-
 ```css
 .satir {
   display: grid;
-  grid-template-columns: 8rem 1fr 4rem;
+  grid-template-columns: 8rem 1fr 5rem;
   gap: 0.5rem;
   align-items: center;
 }
@@ -63,26 +78,28 @@ Satırı JavaScript üretsin. `.cubuk` için CSS:
 }
 ```
 
-Genişliği `style.width = yuzde + "%"` ile ver.
-
-## İki görünüm
-
-İki düğme: “nüfus” ve “diller”. Biri seçilince listeyi boşalt, öteki veriyi bas, başlığı değiştir. Seçili düğmenin sınıfı dursun, öteki çıksın.
-
-İsteğe bağlı üçüncü görünüm: her iki listede de ilk beşi al. `slice` aslı bozmasın, önce kopya. Diziyi büyükten küçüğe sen sırala, veri baştan sıralı gelse bile koda güvenme.
-
-Sayıyı ekranda binlik ayıracıyla göstermek için:
+Genişlik `cubuk.style.width = yuzde + "%"` ile verilir. Ad solda, sayı sağda görünsün. Sayıyı binlik ayraçla göstermek için:
 
 ```js
 new Intl.NumberFormat("tr-TR").format(1430)
 ```
 
-## Bitti saymam için
+Bu, `1.430` metnini verir. Türkçe ayraç noktadır.
 
-- En uzun çubuk satırı doldursun, küçüğü belirgin kısa dursun
-- Düğme, seçili olduğunu renk ile söylesin
-- Sıfır veya negatif değer gelirse çubuk `0%` olsun, eksi genişlik yazma
-- Başlık, “10 ülke” veya “10 dil” diye verinin boyundan gelsin, elle “10” yazma
+## İki görünüm
+
+İki düğme: “nüfus” ve “diller”. Biri seçilince listeyi `replaceChildren` ile boşalt, öteki veriyi bas, başlığı değiştir. Seçili düğmeye bir sınıf ekle, ötekinden çıkar. İkisi birden seçili görünmesin.
+
+İsteğe bağlı üçüncü düğme: ilk beş. `slice` aslı bozmasın. Önce kopya al, büyükten küçüğe sırala, sonra `slice(0, 5)`. Veri baştan sıralı gelse bile koda güvenme. Sıralamayı sen yap.
+
+Başlık “10 ülke” diye elle yazılmasın. `liste.length`ten gelsin. Diziden bir satır silinince başlık da 9 desin.
+
+## Bitti sayılması için
+
+- En uzun çubuk satırı doldursun. 88 milyonluk satır gözle görülür kısa olsun.
+- Düğme, seçili olduğunu renk ile söylesin.
+- Sıfır veya negatif değerde çubuk `0%` olsun.
+- Başlık, verinin boyundan gelsin.
 
 ---
 

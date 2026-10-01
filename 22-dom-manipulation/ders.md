@@ -1,31 +1,34 @@
 # 22. Gün — DOM: üretmek ve silmek
 
-Bir önceki günde var olan öğe değiştirildi. Bu bölümde ağaca düğüm eklenir ve çıkarılır. Liste, kart ve ızgara bu yolla kurulur.
+21. günde var olan yazı değişti. Bu gün ağaçta düğüm üretilir ve silinir. Liste, kart ve ızgara bu yolla kurulur. HTML’de boş bir `ul` durur. Şehirler JavaScript’ten gelir.
+
+```html
+<button id="ekle" type="button">ekle</button>
+<ul id="liste"></ul>
+<script src="main.js"></script>
+```
 
 ## Üretmek
 
+`createElement` düğümü bellekte kurar. Sayfada henüz görünmez. Bir ebeveyne takılınca görünür.
+
 ```js
 const madde = document.createElement("li")
-madde.textContent = "un"
-madde.classList.add("urun")
+madde.textContent = "İzmir"
+madde.classList.add("sehir")
+document.querySelector("#liste").append(madde)
 ```
 
-Bu düğüm henüz sayfada değil. Bellekte durur. Bir ebeveyne takınca görünür.
+Sayfada bir madde belirir: İzmir.
 
-## Takmak
+`append` sona koyar, metin de kabul eder. `prepend` başa koyar. `appendChild` daha eski olanıdır, yalnız düğüm alır.
+
+Çok düğme tek tek `append` edilirse tarayıcı her seferinde sayfayı yeniden ölçer. Yüz kartta `DocumentFragment` kullanılır. Parça bellekte birikir, sayfaya bir kez takılır.
 
 ```js
 const liste = document.querySelector("#liste")
-liste.append(madde)
-```
-
-`append` sona koyar, metin de kabul eder. `prepend` başa koyar. `appendChild` daha eski olanıdır, yalnız düğüm alır. `insertAdjacentHTML` bir konuma HTML metni basar: `"beforeend"`, `"afterbegin"` ve benzeri. Dışarıdan gelen metinde bu yol kullanılmaz.
-
-Çok düğmeyi tek seferde kurup bir kez takmak daha ucuz. Ara ara `append` etmek, her seferinde sayfayı yeniden ölçtürür. Yüzlerce kart basacaksan `DocumentFragment` kullan:
-
-```js
 const parca = document.createDocumentFragment()
-;["un", "tuz", "yağ"].forEach((ad) => {
+;["Van", "İstanbul", "Trabzon"].forEach((ad) => {
   const li = document.createElement("li")
   li.textContent = ad
   parca.append(li)
@@ -33,15 +36,18 @@ const parca = document.createDocumentFragment()
 liste.append(parca)
 ```
 
-## Çıkarmak
+Ekranda üç şehir daha görünür. Önceki İzmir duruyorsa dört olur. Temiz deneme için sayfayı yenile, parçayı tek başına çalıştır.
+
+## Silmek
 
 ```js
-madde.remove()
+const ilk = liste.querySelector("li")
+ilk.remove()
 ```
 
-Ebeveynden `removeChild` da olur. Çocuk yoksa `remove` sessiz ve düzgündür, düğümün kendi üstünden çağırırsın. Olmayan bir seçicide önce `null` kontrolü yap, çünkü `null.remove` patlar.
+İlk madde kaybolur. `null.remove` patlar. Seçici tutmamışsa önce `if (ilk)` bak.
 
-İçini boşaltmak:
+Listenin içini boşaltmak:
 
 ```js
 liste.replaceChildren()
@@ -49,70 +55,80 @@ liste.replaceChildren()
 
 Eski tarayıcılarda `liste.innerHTML = ""` de boşaltır. `replaceChildren` niyeti daha açık gösterir.
 
-## Küçük bir örnek
+## Tıklayınca satır eklemek
 
-Bir kutu ve bir düğme yeter. Düğmeye basılınca kutuya yeni bir satır düşer. Olayın ayrıntısı sonraki gündedir. Bu örnekte yalnız `click` vardır.
-
-```html
-<button id="ekle" type="button">ekle</button>
-<ul id="liste"></ul>
-```
+Olayın ayrıntısı 23. gündedir. Bu örnekte yalnız `click` yeter. Sayacı dışarıda tut. Her tıklama bir artırır.
 
 ```js
 const ekle = document.querySelector("#ekle")
-const liste = document.querySelector("#liste")
+const liste2 = document.querySelector("#liste")
 let sira = 1
 
 ekle.addEventListener("click", () => {
   const li = document.createElement("li")
-  li.textContent = `satır ${sira}`
+  li.textContent = "satır " + sira
   sira += 1
-  liste.append(li)
+  liste2.append(li)
 })
 ```
 
-## Egzersizler: üç küçük sayfa
+Düğmeye üç kez bas. `satır 1`, `satır 2`, `satır 3` alt alta durur. `sira` fonksiyonun içinde `let` ile kurulsaydı her tıklamada 1’e dönerdi. Dışarıda durduğu için hatırlar. Bu, 19. gündeki closure’dur.
 
-Konsol bitti. Bunları gerçek dosyada kur. Görünümü sade tut, asıl ders ağaç.
+## Egzersizler
+
+Üçü de ayrı `index.html` sayfası olsun. Konsolda çalıştırmak yetmez.
 
 ### Sayı ızgarası
 
-0’dan 99’a kadar kutular üret, bir ızgaraya diz. CSS grid işini görür.
+0’dan 99’a kadar kutular üret, bir ızgaraya diz.
 
-- çift sayıların zemini yeşil
-- tek sayıların zemini sarı
-- asal olanların zemini kırmızı, çift-tek kuralının üstüne yazılsın
+```css
+.izgara {
+  display: grid;
+  grid-template-columns: repeat(10, 2.5rem);
+  gap: 4px;
+}
+.kutu {
+  text-align: center;
+  padding: 0.25rem;
+}
+.cift { background: #86efac; }
+.tek { background: #fde68a; }
+.asal { background: #fca5a5; }
+```
 
-Asallık fonksiyonunu 6. gündeki mantıkla yaz. 0 ve 1 asal değil. Kutuyu üretirken sınıfı ona göre ver. Rengi JavaScript ile tek tek `style`’a gömmek yerine üç sınıf yaz.
+- Çift sayıya `cift` sınıfı. Zemin yeşil.
+- Tek sayıya `tek`. Zemin sarı.
+- Asal sayıya `asal`. Zemin kırmızı. Çift ve tek kuralının üstüne yazılır, çünkü asal sınıfı en son eklenir.
 
-### Ürün tahtası
+Asallık fonksiyonu 6. gündeki mantıktır. 0 ve 1 asal değildir. 2 asaldır. Rengi `style.background` ile tek tek gömme. Üç sınıf yeter. Kutunun metni sayının kendisidir.
 
-Elinde şu dizi olsun (kopyala, isterken değiştir):
+### Şehir tahtası
 
 ```js
 const urunler = [
-  { ad: "un", tur: "kuru" },
-  { ad: "süt", tur: "soğuk" },
-  { ad: "elma", tur: "taze" },
-  { ad: "pirinç", tur: "kuru" },
+  { ad: "İzmir", tur: "kıyı" },
+  { ad: "Van", tur: "doğu" },
+  { ad: "İstanbul", tur: "kıyı" },
+  { ad: "Trabzon", tur: "kıyı" },
 ]
 ```
 
-Her ürün bir kart olsun. Türüne göre küçük bir etiket bas. Kartlar akışkan bir ızgarada dursun, sayfa daralınca alta kaysın.
+Her kayıt bir kart olsun. Türü küçük bir etiket olsun. Kartlar `grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr))` ile dizilsin. Sayfa daralınca alta kaysın. Dört kartı HTML’e elle yazma. Döngü kursun.
 
 ### Açılır notlar
 
-Üç başlık ve her birinin altında bir paragraf tanımla, veri JavaScript’te dursun. Ekranda `details` ve `summary` ile üret. Biri açıkken ötekiler kapanmak zorunda değil. Veriyi HTML’e elle yazma; döngü kursun.
+Veri JavaScript’te dursun.
 
 ```js
 const notlar = [
-  { baslik: "saklama", metin: "Kuru ürün üst rafta dursun." },
-  { baslik: "serin", metin: "Süt dolaba, elmeyi dağınık bırakma." },
-  { baslik: "süre", metin: "Pirinç ayakta, unu ağzı kapalı kutuda beklet." },
+  { baslik: "İzmir", metin: "Kıyı, ilk durak." },
+  { baslik: "Van", metin: "Doğu, ikinci durak." },
+  { baslik: "Trabzon", metin: "Kıyı, son durak." },
 ]
 ```
 
-Bitince bir düğme ekle: bütün kartları `replaceChildren` ile silsin.
+Her kayıt için `details` ve içinde `summary` üret. `summary` başlık, geri kalan metin olsun. Biri açıkken ötekiler kapanmak zorunda değildir. Bir düğme bütün kartları `replaceChildren` ile silsin. Silince sayfada not kalmasın.
 
 ---
 

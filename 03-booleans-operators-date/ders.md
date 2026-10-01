@@ -1,38 +1,64 @@
 # 3. Gün — Boolean, operatörler, tarih
 
-Bu bölümde doğruluk değeri, karşılaştırma, mantık operatörleri ve `Date` ele alınır. Bir sonraki günün koşulları bu başlıkların üzerine oturur.
+Koşul, “şu doğruysa şunu yap” demektir. Doğru ya da yanlış değer üretmeyi bilmeden koşul yazılmaz. Bu gün o değeri üreten karşılaştırmalar, bir de takvim vardır. Yarınki `if` bu günün üzerine oturur.
 
-## Boolean
+Örnekleri konsola yapıştır. Altındaki sonuç sende de aynı olmalıdır.
 
-Yalnızca iki değer vardır: `true` ve `false`. Karşılaştırma da birçok ifade de bu ikisinden birini bırakır.
+## true ve false
+
+Mantık değerinin yalnız iki hali vardır: `true` ve `false`. Karşılaştırma da bu ikisinden birini bırakır.
 
 ```js
 console.log(7 > 3)
+console.log(7 === 7)
 console.log(7 === "7")
 ```
 
-### Hangisi dolu sayılır
+```text
+true
+true
+false
+```
 
-Koşulun içine sayı veya metin yazılırsa değer mantığa çevrilir.
+Üçüncü satır yanlıştır çünkü soldaki sayı, sağdaki metindir. Türler aynı değildir.
 
-Dolu sayılanlar: dolu metin, sıfır dışı sayı, dolu dizi, dolu nesne, `true`.
+## Hangi değer dolu sayılır
+
+`if`in içine metin veya sayı yazılırsa JavaScript onu mantığa çevirir. Çeviriyi kendin görmek için `Boolean(...)` kullanılır.
+
+Dolu sayılanlar: dolu metin, 0 dışı sayı, dolu liste, dolu nesne, `true`.
 
 Boş sayılanlar: `0`, `""`, `null`, `undefined`, `NaN`, `false`.
 
 ```js
-console.log(Boolean("kayık"))
+console.log(Boolean("İzmir"))
 console.log(Boolean(""))
 console.log(Boolean(0))
 console.log(Boolean(12))
 ```
 
-`null`, bilerek boş bırakılmış değerdir. `undefined`, henüz değer verilmediğini gösterir. Bir alan boşaltılacaksa `null` yazılır. Alana hiç dokunulmadıysa değer zaten `undefined` kalır.
+```text
+true
+false
+false
+true
+```
 
-## Atama
+`null` bilerek boş bırakılmış değerdir. `undefined` henüz değer verilmediğini söyler. Bir kutu boşaltılacaksa `null` yazılır. Kutuya hiç dokunulmadıysa zaten `undefined` kalır.
 
-`=` değer koyar. `==` kıyaslar. Bu ikisi sık karışır.
+## Atama ile karşılaştırma
 
-Kısayollar:
+`=` değer koyar. `==` kıyaslar. İkisi sık karışır.
+
+```js
+let puan = 10
+puan = 12
+console.log(puan)
+```
+
+`puan = 12` kıyas değildir. Kutunun içini 12 yapar. Kıyas `==` veya `===` iledir.
+
+Aynı işlemi kısa yazmak:
 
 ```js
 let puan = 10
@@ -43,20 +69,16 @@ puan /= 2
 console.log(puan)
 ```
 
-## Aritmetik, bir kez daha
-
-`+ - * / % **` bir önceki gündeki gibidir. Metinle toplama birleştirir, diğer işlemler sayıyı zorlar. Emin olmak için `Number` kullanılır.
+Adım adım: 10’a 5 eklenir, 15 olur. 2 çıkar, 13 kalır. 3’le çarpılır, 39 olur. 2’ye bölünür, 19.5 kalır.
 
 ## Karşılaştırma
 
-`>` `<` `>=` `<=` bilinen sıralama.
+`>` `<` `>=` `<=` bilinen sıradır. Eşitlikte iki kapı vardır.
 
-Eşitlikte iki kapı var:
+- `==` türü zorlar. `"4" == 4` doğrudur, çünkü metin sayıya çevrilir.
+- `===` hem değeri hem türü ister. `"4" === 4` yanlıştır.
 
-- `==` türü zorlar. `"4" == 4` doğru çıkar.
-- `===` türü de değeri de ister. `"4" === 4` yanlış çıkar.
-
-Karşılaştırmada `===` ve `!==` kullanılır. Türü zorlayan eşitlik beklenmedik sonuç üretir.
+Bu derslerde eşitlik `===`, eşitsizlik `!==` ile yazılır. Türü zorlayan eşitlik gece yarısı hata çıkarır.
 
 ```js
 console.log(4 == "4")
@@ -65,9 +87,20 @@ console.log(null == undefined)
 console.log(null === undefined)
 ```
 
+```text
+true
+false
+true
+false
+```
+
+`null` ile `undefined` yalnız gevşek eşitlikte birbiriyle eşleşir. `===` onları ayırır. Bu yüzden “hiç değer yok” diye bakılırken `===` seçilir.
+
 ## Mantık
 
-`&&` ikisi de doğruysa doğru. `||` biri doğruysa doğru. `!` tersine çevirir.
+`&&` ikisi de doğruysa doğrudur. Biri aksarsa bütün ifade aksar. `||` birinin doğru olması yeter. `!` ters çevirir.
+
+Serhat 20 yaşında ve bileti var. İçeri girmek için yaş 18 veya üstü olmalı ve bilet bulunmalı.
 
 ```js
 const yas = 20
@@ -77,15 +110,46 @@ console.log(yas < 18 || bilet)
 console.log(!bilet)
 ```
 
-Bu operatörler son baktıkları değeri de döndürebilir. `"" || "Serhat"` sonucu `"Serhat"` olur. Boş değerde yedek ad koymak için kullanılır.
+```text
+true
+true
+false
+```
 
-## Artırma ve azaltma
+Bu işaretler son baktıkları değeri de döndürebilir. Boş metin dolu değildir, bu yüzden sağdaki yedek adı seçer:
 
-`puan++` önce değeri kullanır, sonra bir ekler. `++puan` önce ekler, sonra kullanır. Tek başına satırda fark görünmez. İfadenin içinde sonuç şaşırtır. Ayrı satırda `puan += 1` yazmak daha açıktır.
+```js
+console.log("" || "Serhat")
+console.log("Van" || "Serhat")
+```
+
+```text
+Serhat
+Van
+```
+
+İkinci satırda soldaki doludur, sağa bakılmaz.
+
+## Bir artır, bir azalt
+
+`puan++` önce eski değeri kullanır, sonra bir ekler. `++puan` önce ekler, sonra kullanır. Tek başına bir satırda fark görünmez. İfadenin içinde görünür.
+
+```js
+let puan = 10
+console.log(puan++)
+console.log(puan)
+```
+
+```text
+10
+11
+```
+
+İlkinde konsol henüz artmamış 10’u basar, sonra kutu 11 olur. Karışıklık olmasın diye ayrı satırda `puan += 1` yazılır.
 
 ## Üçlü operatör
 
-Kısa karar buradadır. Uzun karar bir sonraki günde `if` ile yazılır.
+Tek satırlık seçim. Uzun karar yarın `if` ile yazılır.
 
 ```js
 const sicaklik = 28
@@ -93,22 +157,23 @@ const hal = sicaklik > 24 ? "ince giy" : "ceket al"
 console.log(hal)
 ```
 
+```text
+ince giy
+```
+
+Kalıp şudur: `koşul ? doğruysa bu : yanlışsa bu`. Soru işareti “ise”, iki nokta “değilse” diye okunur.
+
 ## Öncelik
 
-Çarpma toplamadan önce gelir. Sıra net değilse parantez konur. Parantez hem motor hem okuyan için sırayı sabitler.
-
-```js
-console.log(2 + 3 * 4)
-console.log((2 + 3) * 4)
-```
+Çarpma toplamadan önce yapılır. `2 + 3 * 4` önce `3 * 4` der, 12 bulur, 2 ekler, 14 olur. Parantez sırayı zorlar. `(2 + 3) * 4` sonucu 20’dir. Sıra kafa karıştırıyorsa parantez konur.
 
 ## Tarayıcının üç penceresi
 
-Bunlar tarayıcıda çalışır, saf Node’da yok.
+Bunlar yalnız tarayıcıda vardır.
 
-- `alert("kapı kilitli")` — tek bir tamam.
-- `prompt("Ad", "Serhat")` — metin ister, iptalde `null` gelir.
-- `confirm("çıkayım mı?")` — tamam `true`, iptal `false`.
+- `alert("kapı kilitli")` tek bir Tamam düğmesi gösterir.
+- `prompt("Ad", "Serhat")` metin ister. İptalde `null` gelir.
+- `confirm("çıkılsın mı?")` Tamam derse `true`, İptal derse `false` gelir.
 
 ```js
 const ad = prompt("Ad", "Serhat")
@@ -117,11 +182,11 @@ if (ad) {
 }
 ```
 
-Bu üç metod sayfayı kilitlediği için seyrek kullanılır. Form ve olay 23. günde ele alınır.
+Bu üçü sayfayı kilitler. Kullanıcı pencereyi kapatmadan sayfa donar. Günlük arayüzde form kullanılır. Form 23. gündedir. Bu gün yalnız ne yaptıklarını görmek için bir kez dene.
 
 ## Tarih
 
-`Date` şimdiki anı ya da verilen anı tutar. Ay **0’dan** başlar. Ocak `0`, Aralık `11`. Bu unutulursa takvim bir ay kayar.
+`Date` şimdiki anı ya da verilen anı tutar. Ay **0’dan** başlar. Ocak `0`, Aralık `11` olur. Aralık’ı `12` sanmak takvimi bir ay kaydırır.
 
 ```js
 const simdi = new Date()
@@ -130,33 +195,34 @@ console.log(simdi.getMonth())
 console.log(simdi.getDate())
 console.log(simdi.getDay())
 console.log(simdi.getHours())
-console.log(simdi.getMinutes())
-console.log(simdi.getSeconds())
-console.log(simdi.getTime())
 ```
 
-`getDay` haftanın günü: pazar `0`. `getDate` ayın günü. İsimler yakın, işleri ayrı.
+`getFullYear` dört haneli yıldır. `getMonth` 0–11 arasındadır. Ekranda 1–12 göstermek için sonuca `1` eklenir. `getDate` ayın günüdür, 1’den başlar. `getDay` haftanın günüdür, pazar `0`, cumartesi `6` olur. İki ad yakındır, işleri ayrıdır.
 
-İki anın farkı milisaniye cinsinden alınır. `getTime()`, 1970’ten bu yana geçen milisaniyedir.
+`getTime()` 1 Ocak 1970’ten bu yana geçen milisaniyeyi verir. İki tarih çıkarılınca aradaki süre milisaniye olur. Güne çevirmek için `1000 * 60 * 60 * 24`e bölünür. Payda, bir gündeki milisaniyedir.
 
 ```js
-const bas = new Date("2026-10-01")
-const bit = new Date("2026-10-11")
-const gun = (bit.getTime() - bas.getTime()) / (1000 * 60 * 60 * 24)
+const gidis = new Date("2026-10-01")
+const donus = new Date("2026-10-11")
+const gun = (donus.getTime() - gidis.getTime()) / (1000 * 60 * 60 * 24)
 console.log(gun)
 ```
 
-Ekranda göstermek için `toLocaleDateString("tr-TR")` kullanılır.
+```text
+10
+```
+
+İnsan gözü için `simdi.toLocaleDateString("tr-TR")` gün.ay.yıl biçimini verir.
 
 ## Egzersizler
 
-1. Üç değer yazın: dolu bir metin, boş metin, `0`. Üçünün de `Boolean` karşılığını yazdırın.
-2. `"9"` ile `9` üzerinde `==` ve `===` deneyin. Farkı bir cümleyle not edin.
-3. Bir yaş ve bir `uye` değişkeni tutun. İkisi de uygunsa `"içeri"` yazsın. Üçlü operatör kullanın.
-4. `puan +=` ile 0’dan başlayıp 10, sonra yarısı, sonra 3 fazlasını hesaplayın.
-5. İçinde bulunulan yıl, ay (1–12) ve günü tek satırda yazdırın. Ayı `+ 1` ile düzeltin.
-6. `2026-01-01` ile bugün arasındaki gün sayısını kabaca hesaplayın.
-7. Tarayıcıda `confirm` ile bir soru sorun. Cevaba göre konsola iki farklı cümle yazdırın.
+1. `"Van"`, `""` ve `0` için `Boolean` sonucunu yazdır. Hangileri dolu, bir satır not et.
+2. `"9"` ile `9` üzerinde `==` ve `===` dene. Biri neden doğru, öteki neden yanlış, yaz.
+3. `yas` ve `uye` değişkeni tut. Yaş en az 18 ve üye ise `"içeri"` yazsın. Üçlü operatör kullan. İki farklı değerle dene, iki sonucu da gör.
+4. `puan = 0` ile başla. `+=` ile 10 yap, `/=` ile yarısını al, `+=` ile 3 ekle. Her adımdan sonra yazdır.
+5. Bu anın yılını, ayını (1–12) ve gününü tek satırda yazdır. Ay için `getMonth() + 1` kullan.
+6. `2026-01-01` ile bugün arasındaki gün sayısını hesapla. Yukarıdaki milisaniye bölmesini kullan.
+7. `confirm` ile bir soru sor. `true` ise konsola `Serhat, Trabzon`, `false` ise `iptal` yaz.
 
 ---
 

@@ -1,77 +1,103 @@
 # 21. Gün — DOM: bulmak ve şekillendirmek
 
-Şimdiye kadar sonuç konsoldaydı. Bundan sonra sonuç sayfada. DOM, tarayıcının HTML’den kurduğu ağaçtır. Her etiket bir düğüm. JavaScript o ağaca uzanır, metni değiştirir, sınıf ekler, rengi oynatır.
+Şimdiye kadar sonuç konsoldaydı. Bundan sonra sonuç sayfadadır. DOM, tarayıcının HTML’den kurduğu ağaçtır. Her etiket bir düğümdür. JavaScript o ağaca uzanır, metni değiştirir, sınıf ekler, rengi oynatır.
 
-Kod, HTML çizildikten sonra çalışsın. `script` etiketini `body` sonunda tut, ya da `defer` ile başa koy. Başta düz `script` yazarsan ağaç daha yokken ararsın, `null` alırsın.
+Kod, HTML çizildikten sonra çalışır. `script` etiketi `body` sonunda durur. Başta durursa ağaç daha yokken aranır, sonuç `null` olur. `null` üstünden `.textContent` okumak `TypeError` verir.
+
+Aşağıyı `index.html` diye kaydet. Aynı klasöre `main.js` koy. Dosyayı Chrome’da aç, `F12` ile konsola bak.
+
+```html
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Gün 21</title>
+  </head>
+  <body>
+    <main id="sahne">
+      <h1 id="baslik">Durak</h1>
+      <p class="not">İzmir</p>
+      <p class="not">Van</p>
+      <p class="not">Trabzon</p>
+      <button type="button" data-islem="sil">sil</button>
+    </main>
+    <script src="main.js"></script>
+  </body>
+</html>
+```
 
 ## Bulmak
 
-```html
-<main id="sahne">
-  <p class="not">ilk not</p>
-  <p class="not">ikinci not</p>
-  <button data-islem="sil">sil</button>
-</main>
-<script src="main.js"></script>
-```
-
 ```js
 const sahne = document.getElementById("sahne")
+const baslik = document.querySelector("#baslik")
 const ilkNot = document.querySelector(".not")
 const notlar = document.querySelectorAll(".not")
 const sil = document.querySelector("[data-islem='sil']")
+
+console.log(baslik.textContent)
+console.log(notlar.length)
+console.log(ilkNot.textContent)
 ```
 
-`getElementById` tek düğüm veya `null`. `querySelector` CSS seçicisiyle ilkini verir, yoksa `null`. `querySelectorAll` durağan bir liste verir, diziye benzetmek için `[...notlar]` yaparım. Liste boş olabilir, `null` olmaz.
+```text
+Durak
+3
+İzmir
+```
 
-Eski API’ler de durur: `getElementsByClassName`, `getElementsByTagName`. Canlı liste döndürürler, DOM değişince kendileri de değişir. Yeni kodda `querySelector` ailesi kullanılır.
+`getElementById` tek düğüm verir. Yoksa `null`. `querySelector` CSS seçicisiyle ilkini verir. `#baslik` id, `.not` sınıftır. `querySelectorAll` durağan bir liste verir. Üç paragraf vardır, `length` 3 olur. Liste dizi değildir. Dizi metodu istenirse `[...notlar]` yapılır. Liste boş olabilir, `null` olmaz. Boş listenin uzunluğu `0`dır.
 
-`null` üstünden `.textContent` okursan `TypeError`. Seçicinin tuttuğundan emin ol, ya da bir kez kontrol et.
+Eski API’ler de durur: `getElementsByClassName`, `getElementsByTagName`. Canlı listedir, DOM değişince kendileri de değişir. Yeni kodda `querySelector` kullanılır.
 
-## Metin ve HTML
+## Metni değiştirmek
 
 ```js
+baslik.textContent = "Serhat, İstanbul"
 ilkNot.textContent = "yeniden yazıldı"
 ```
 
-`textContent` metindir, etiketi yazı olarak gösterir. `innerHTML` etiketi gerçekten basar. Dışarıdan gelen metin `innerHTML` içine konmaz; etiket enjekte edilebilir. Kullanıcı metninde `textContent` kullanılır.
+Sayfada başlık ve ilk paragraf değişir. `textContent` düz metindir. İçine `<b>` yazılırsa etiket olarak değil, yazı olarak görünür.
+
+`innerHTML` etiketi gerçekten basar. Dışarıdan gelen metin oraya konmaz. Biri etiket enjekte edebilir. Kullanıcı metninde `textContent` kullanılır.
 
 ```js
-ilkNot.innerHTML = "<strong>kalın</strong>"
+ilkNot.innerHTML = "<strong>İzmir</strong>"
 ```
 
-Girdi kutusunun değeri ayrıdır: `input.value`.
+İlk paragraf kalın görünür. Aynı yere `textContent = "<strong>İzmir</strong>"` yazılırsa kalın olmaz, etiketler ekranda yazı olarak durur. İkisini de dene.
 
-## Öznitelik ve veri
+Girdi kutusunun yazısı ayrıdır. `input.value` okunur. `textContent` kutu için boş kalabilir.
+
+## Öznitelik, veri, sınıf
 
 ```js
 const dugme = document.querySelector("button")
-dugme.setAttribute("disabled", "")
 console.log(dugme.getAttribute("data-islem"))
 dugme.dataset.islem = "arsiv"
+console.log(dugme.dataset.islem)
 ```
 
-`data-islem` HTML’de, `dataset.islem` JavaScript’te. Tire, camelCase’e döner: `data-kullanici-id` → `dataset.kullaniciId`.
+```text
+sil
+arsiv
+```
 
-Sınıf için `className` tüm listeyi ezer. Parça parça oynamak için `classList`:
+HTML’de `data-islem`, JavaScript’te `dataset.islem` olur. Tire, camelCase’e döner. `data-kullanici-id` , `dataset.kullaniciId` olur.
+
+`dugme.setAttribute("disabled", "")` düğmeyi kilitler. Tıklanmaz.
+
+Sınıfın tamamını `className` ezer. Parça parça oynamak için `classList` vardır.
 
 ```js
 ilkNot.classList.add("soluk")
-ilkNot.classList.remove("soluk")
-ilkNot.classList.toggle("soluk")
 console.log(ilkNot.classList.contains("soluk"))
+ilkNot.classList.toggle("soluk")
 ```
 
-## Biçim
+`toggle` varsa çıkarır, yoksa ekler. `contains` evet/hayır döndürür.
 
-Doğrudan `style` acil iştir. Kalıcı görünümü CSS sınıfında tut, kod yalnız sınıfı eklesin. Yine de acil yol şu:
-
-```js
-sahne.style.backgroundColor = "#f4efe6"
-sahne.style.padding = "16px"
-```
-
-CSS’te `background-color`, JavaScript’te `backgroundColor` yazılır. Birden fazla özellik basılacaksa `cssText` kullanılabilir ama var olan satır içi biçimi siler. Kalıcı görünüm için sınıf tercih edilir.
+`style` satırında bir sınıf tanımla. Kod yalnız sınıfı eklesin.
 
 ```css
 .soluk {
@@ -79,16 +105,29 @@ CSS’te `background-color`, JavaScript’te `backgroundColor` yazılır. Birden
 }
 ```
 
+Bu kuralı `head` içindeki `style` etiketine koy. `soluk` eklenince paragraf solar. Kural yoksa sınıf eklenir ama gözle bir şey değişmez. İkisi birlikte gerekir.
+
+## Doğrudan renk
+
+Acil deneme için `style` kullanılır. Kalıcı görünüm CSS sınıfında durur.
+
+```js
+sahne.style.backgroundColor = "#f4efe6"
+sahne.style.padding = "16px"
+```
+
+CSS’te `background-color`, JavaScript’te `backgroundColor` yazılır. Tire düşer, sonraki harf büyür. `cssText` birçok özelliği birden basar ama var olan satır içi biçimi siler.
+
 ## Egzersizler
 
-Basit bir HTML kur: bir başlık, üç paragraf, bir düğme.
+Hepsi gerçek sayfada olsun. Konsola yazmak yetmez. Gözle değişimi gör.
 
-1. Başlığı `querySelector` ile bul, metnini değiştir.
-2. Üç paragrafı `querySelectorAll` ile al, `forEach` ile sonuna sıra numarası ekle.
-3. Düğmeye `classList` ile `hazir` sınıfı ekle. CSS’te o sınıf yazı rengini değiştirsin.
-4. Düğmenin `data-rol` değerini oku, konsola yaz, sonra başka bir değerle değiştir.
-5. Olmayan bir seçicide `null` aldığını gör. Üstünden metin okumayı `if` ile koru.
-6. Bir paragrafa `innerHTML` ile kalın etiket bas. Aynı yere `textContent` ile `<b>deneme</b>` bas, etiketin yazıya döndüğünü gör.
+1. Başlığı `querySelector("#baslik")` ile bul. Metnini `Serhat, Van` yap.
+2. Üç paragrafı `querySelectorAll(".not")` ile al. `forEach` ile sonuna sıra numarası ekle. Ekranda `İzmir 0`, `Van 1`, `Trabzon 2` görünsün. Numara indekstir, 0’dan başlar.
+3. Düğmeye `classList.add("hazir")` ekle. CSS’te `.hazir { color: #9a3412; }` yaz. Yazı rengi değişsin. `remove` ile rengin geri geldiğini gör.
+4. Düğmenin `data-islem` değerini oku, konsola yaz. Sonra `dataset` ile `goster` yap. HTML’de özniteliğin değiştiğini Öğeler sekmesinden gör.
+5. `querySelector("#yok")` dene. `null` olduğunu yazdır. Üstünden `textContent` okumayı `if (dugum)` ile koru. Korumazsan `TypeError` gelir. İkisini de gör.
+6. Bir paragrafa `innerHTML` ile `<strong>Trabzon</strong>` bas, kalın olsun. Aynı paragrafa `textContent` ile aynı etiketi bas, kalınlığın gittiğini gör.
 
 ---
 

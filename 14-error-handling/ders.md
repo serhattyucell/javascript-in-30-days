@@ -1,10 +1,10 @@
 # 14. Gün — Hata yönetimi
 
-Hata, programın o satırdan sonra devam edemediğini gösterir. Yakalanmazsa sonraki kod çalışmaz. Yakalanırsa kullanıcıya düzgün bir ileti, konsola da bir iz kalır.
+Hata, programın o satırdan sonra devam edemediğini gösterir. Yakalanmazsa sonraki kod çalışmaz, konsol kırmızı kalır. Yakalanırsa kullanıcıya düzgün bir cümle yazılır, ayrıntı konsolda tutulur.
 
 ## try, catch, finally
 
-Şüpheli işi `try` içine koy. Patlarsa `catch` çalışır. `finally` her halükârda çalışır: kutu kapansın, yükleniyor yazısı gizlensin.
+Şüpheli iş `try` içine konur. Fırlarsa `catch` çalışır. `finally` her durumda çalışır. Kutu kapanacaksa, “yükleniyor” yazısı gizlenecekse yeri orasıdır.
 
 ```js
 function bol(a, b) {
@@ -24,26 +24,27 @@ try {
 }
 ```
 
-`throw` yoksa ve motor da şikâyet etmiyorsa `catch` hiç girmez. `finally` yine girer.
+```text
+sıfıra bölme
+deneme bitti
+```
+
+`throw` olunca `try`nin geri kalanı atlanır. `catch` mesajı basar. `finally` yine çalışır. `bol(10, 2)` çağrılsaydı konsol önce `5` basar, “bu satır atlanır” da çalışır, `catch`e girilmez, `finally` yine girer.
 
 ## throw
 
-`throw` ile bir değer fırlatılır. Çoğu zaman bu değer `Error` nesnesidir. Düz metin de fırlatılır ama yığın izi kaybolur. Bu nedenle `new Error("...")` kullanılır.
+`throw` bir değeri dışarı fırlatır. Düz metin de fırlatılır ama yığın izi kaybolur. `new Error("...")` hem mesaj hem iz taşır. İz, hatanın hangi satırdan geldiğini gösterir. Kullanıcıya iz gösterilmez. Konsolda kalır.
 
-Kendi türünü de üretebilirsin:
+Kendi türü de kurulur. `instanceof` ile ayırt edilir. Bilinmeyen hata yutulmaz, yeniden fırlatılır.
 
 ```js
 class StokHatasi extends Error {
   constructor(urun) {
-    super(`${urun} kalmadı`)
+    super(urun + " kalmadı")
     this.name = "StokHatasi"
   }
 }
-```
 
-`catch` içinde `instanceof` ile ayırırsın. Her hatayı aynı cümleyle yutma. Bilmediğin hatayı tekrar fırlat:
-
-```js
 try {
   throw new StokHatasi("un")
 } catch (hata) {
@@ -55,40 +56,45 @@ try {
 }
 ```
 
+```text
+un kalmadı
+```
+
+`extends` 15. gündeki kalıtımdır. Burada yalnız “bu hata `Error`ın özel bir halidir” demek için durur. Boş `catch { }` hatayı yok eder. Üç gün sonra kayıt neden yok diye aranır. En azından `console.error(hata)` konur.
+
 ## Sık türler
 
 Motorun kendi ürettikleri:
 
-- `ReferenceError` — hiç tanımlanmamış isim
-- `TypeError` — olmayan metodu çağırmak, `null` üstünde alan okumak
-- `SyntaxError` — kod daha çalışmadan bozuk. `try` ile çoğu söz dizimi hatasını yakalayamazsın, çünkü dosya parse edilemez. `JSON.parse` bozuk metinde söz dizimi hatası fırlatır, onu yakalarsın
-- `RangeError` — dizi uzunluğuna saçma bir sayı vermek gibi, aralık dışı
+| Tür | Ne zaman |
+| --- | --- |
+| `ReferenceError` | hiç tanımlanmamış isim |
+| `TypeError` | olmayan metodu çağırmak, `null` üstünde alan okumak |
+| `SyntaxError` | dosya daha çalışmadan bozuksa. `JSON.parse` bozuk metinde bunu fırlatır, o yakalanır |
+| `RangeError` | aralık dışı bir sayı, örneğin liste uzunluğuna saçma bir değer |
 
 ```js
 try {
   JSON.parse("{ad:}")
 } catch (hata) {
   console.log(hata.name)
+  console.log(hata.message)
 }
 ```
 
-Hata nesnesinde `name`, `message`, `stack` vardır. Kullanıcıya `stack` gösterme. Onu kendi konsolunda tut.
+`name` `SyntaxError` olur. `message` nerede bozulduğunu söyler. Hata nesnesinde bir de `stack` vardır. Onu kullanıcıya basma.
 
-## Nerede yutmamalısın
-
-Boş `catch` görürsem rahatsız olurum. Hata kaybolur, üç gün sonra “neden kayıt yok” diye ararsın. En azından `console.error` koy. Daha iyisi: beklediğin hatayı çevir, gerisini yukarı bırak.
-
-`try` bloğu bütün dosyayı sarmamalıdır. Yalnızca gerçekten fırlatabilecek yer sarılır: JSON çözmek, `localStorage` kotası, bölme, dışarıdan gelen sayı.
+`try` bütün dosyayı sarmaz. Yalnız fırlatabilecek yer sarılır: JSON çözmek, tarayıcı deposunun kotası, bölme, kutudan gelen sayı.
 
 ## Egzersizler
 
-1. Sıfıra bölen bir fonksiyon yaz, `throw` etsin. Çağıranı `try/catch` ile sar, mesajı yazdır.
-2. `finally` içine bir sayaç koy. Hem hata olunca hem olmayınca arttığını gör.
-3. Bozuk bir JSON metnini `JSON.parse` ile çöz, hatanın `name` ve `message` alanlarını yazdır.
-4. Tanımsız bir fonksiyon çağır. `ReferenceError` mı geliyor, bak.
-5. `null` bir değişkenin `.ad` alanını okumayı dene. Gelen tür `TypeError`.
-6. `StokHatasi` diye bir sınıf üret. Bir ürün listesinden düşerken adet 0 ise onu fırlat, `catch` içinde yalnız o türü yakala.
-7. Bilerek boş bir `catch` yaz, sonra içine log ekle. İkisinde de hatanın kaybolup kaybolmadığına bak.
+1. Sıfıra bölen `bol` fonksiyonunu yaz. `throw new Error("sıfıra bölme")` etsin. Çağrıyı `try/catch` ile sar. `message`ı yazdır. `bol(8, 2)` de dene, `4` gör, `catch`e girme.
+2. `finally` içine `let adim = 0` yerine dışarıda bir sayaç koy, `finally`de artır. Hem hata olunca hem olmayınca sayacın arttığını gör.
+3. `"{ad:}"` metnini `JSON.parse` ile çöz. `name` ve `message` yazdır.
+4. Tanımsız bir fonksiyon çağır: `yokBoyledBirFonksiyon()`. `ReferenceError` geldiğini gör. `try` dışındaysa alttaki satırlar çalışmaz. `try` içine alınca alttaki satırın çalıştığını gör.
+5. `const kisi = null` olsun. `kisi.ad` oku. Gelen tür `TypeError` olsun. `catch` içinde bunu yazdır.
+6. `StokHatasi` sınıfını kur. Ürün adı `"Van çayı"` olsun. `catch` içinde yalnız bu türü yakala, `message` `Van çayı kalmadı` olsun. Başka bir `Error` fırlatıldığında yeniden `throw` edildiğini de bir kez dene. O denemede program yine kırılır. Bu doğrudur. Bilinmeyen hata gizlenmemelidir.
+7. Bilerek boş bir `catch` yaz, hatanın kaybolduğunu gör. İçine `console.error` ekle, geri gelsin.
 
 ---
 
